@@ -7,6 +7,8 @@ set directory=~/.vim/swp   "puts all swp files in this ~/.vim/swp instead of loc
 set et   "expandtab: makes the tab key insert spaces instead of tabs
 set foldlevel=1   "auto-folds everything more than one indent
 set foldmethod=indent   "fold uses indents
+set incsearch   "searchs as you type
+set hlsearch   "highlights all finds
 set number   "show line numbers
 set ruler   "show cursoer position [row, col] in bottom right
 set sw=2   "shiftwidth: how many spaces tabs equal
