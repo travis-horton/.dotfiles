@@ -1,17 +1,19 @@
 [user]
-	name = kiddspazz
-	email = travishorton.pianist@gmail.com
+  name = kiddspazz
+  email = travishorton.pianist@gmail.com
 [ui]
-	color = auto
+  color = auto
 [hub]
-	protocol = https
+  protocol = https
 [credential]
-	helper = osxkeychain
+  helper = osxkeychain
 [core]
-	excludesfile = /Users/th/.gitignore_global
-	editor = vim
+  excludesfile = /Users/th/.gitignore_global
+  editor = vim
 [filter "lfs"]
-	process = git-lfs filter-process
-	required = true
-	clean = git-lfs clean -- %f
-	smudge = git-lfs smudge -- %f
+  process = git-lfs filter-process
+  required = true
+  clean = git-lfs clean -- %f
+  smudge = git-lfs smudge -- %f
+[alias]
+  graph = log --graph --pretty=oneline --abbrev-commit --all --decorate

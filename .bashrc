@@ -4,6 +4,7 @@ export EDITOR='vim'   #sets editor to vim
 set -o vi #sets bash commands to vim commands
 
 alias ll='ls -alhFG' #allows ll for long list
+alias cleanupds="find . -type f -name '*.DS_Store' -ls -delete"
 
 [[ -r "/usr/local/etc/profile.d/bash_completion.sh" ]] && . "/usr/local/etc/profile.d/bash_completion.sh" #source for bash completion
 
