@@ -6,6 +6,11 @@ set -o vi #sets bash commands to vim commands
 alias ll='ls -alhFG' #allows ll for long list
 alias cleanupds="find . -type f -name '*.DS_Store' -ls -delete"
 
+mkcd() {
+  mkdir "$1"
+  cd "$1"
+}
+
 [[ -r "/usr/local/etc/profile.d/bash_completion.sh" ]] && . "/usr/local/etc/profile.d/bash_completion.sh" #source for bash completion
 
 GIT_PS1_SHOWDIRTYSTATE=true #defines git status

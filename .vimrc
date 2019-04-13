@@ -10,8 +10,8 @@ set foldmethod=indent   "fold uses indents
 set incsearch   "searchs as you type
 set hidden   "keeps vim from warnings on new buffer
 set hlsearch   "highlights all finds
-set nocompatible "takes out archaic vim
-set number   "show line numbers
+set nocompatible   "takes out archaic vim
+set rnu   "show relative line numbers
 set ruler   "show cursoer position [row, col] in bottom right
 set sw=2   "shiftwidth: how many spaces tabs equal
 set si   "smartindent: indents based on syntax, requires autoindent
