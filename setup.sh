@@ -1,7 +1,7 @@
 #!/bin/sh
 
-ln -sf "$HOME/.bashrc" ~/.bashrc 
-ln -sf "$HOME/.bash_profile" ~/.bash_profile
-ln -sf "$HOME/.vimrc" ~/.vimrc
-ln -sf "$HOME/.gitconfig" ~/.gitconfig
-ln -sf "$HOME/.npmrc" ~/.npmrc
+ln -sf "$HOME/.bashrc" ~dotfiles/.bashrc 
+ln -sf "$HOME/.bash_profile" ~dotfiles/.bash_profile
+ln -sf "$HOME/.vimrc" ~dotfiles/.vimrc
+ln -sf "$HOME/.gitconfig" ~dotfiles/.gitconfig
+ln -sf "$HOME/.npmrc" ~dotfiles/.npmrc
