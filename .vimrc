@@ -1,6 +1,6 @@
 syntax enable    "enable means it won't override other highlighting (supposedly)
 filetype plugin indent on   "uses file extension to determine indentation
-colorscheme evening
+colorscheme desert
 
 set ai   "autoindent: required for smartindent
 set directory=~/.vim/swp   "puts all swp files in this ~/.vim/swp instead of local
@@ -11,7 +11,7 @@ set incsearch   "searchs as you type
 set hidden   "keeps vim from warnings on new buffer
 set hlsearch   "highlights all finds
 set nocompatible   "takes out archaic vim
-set rnu   "show relative line numbers
+set number   "show line numbers
 set ruler   "show cursoer position [row, col] in bottom right
 set sw=2   "shiftwidth: how many spaces tabs equal
 set si   "smartindent: indents based on syntax, requires autoindent
