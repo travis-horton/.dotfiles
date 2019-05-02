@@ -1,11 +1,7 @@
 #!/bin/sh
 
-pushd `dirname $0` > /dev/null
-DIR=`pwd`
-popd > /dev/null
-
-ln -s "$DIR/.bashrc" ~/.bashrc 
-ln -s "$DIR/.bash_profile" ~/.bash_profile
-ln -s "$DIR/.vimrc" ~/.vimrc
-ln -s "$DIR/.gitconfig" ~/.gitconfig
-ln -s "$DIR/.npmrc" ~/.npmrc
+ln -sf "$HOME/.bashrc" ~/.bashrc 
+ln -sf "$HOME/.bash_profile" ~/.bash_profile
+ln -sf "$HOME/.vimrc" ~/.vimrc
+ln -sf "$HOME/.gitconfig" ~/.gitconfig
+ln -sf "$HOME/.npmrc" ~/.npmrc
