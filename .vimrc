@@ -29,11 +29,12 @@ nnoremap <C-p> :bprev<CR>
 set laststatus=2   "always show statusbar
 "resets status line
 set statusline=
-set statusline+=%f\   "filename
-set statusline+=%-10.3n\   "buffer number
-set statusline+=%h%m%r%w   "status flags
-set statusline+=\[%{strlen(&ft)?&ft:'none'}]   "file type
+"show path
+set statusline+=\|\ Path:\ %r%F\  
+set statusline+=\|\ Buf:\ %.3n\   "buffer number
+set statusline+=\|\ Flags:\ %h%m%r%w   "status flags
 set statusline+=%=   "right align remainder
-set statusline+=0x%-8B   "character value
-set statusline+=%-14(%l,%c%V%)   "line, character
-set statusline+=%<%P   "file position
+set statusline+=\|\ Char:\ 0x%B\    "character value
+set statusline+=\|\ Pos:\ %(%l,%c%V%)\    "line, character
+set statusline+=\|\ File\ Pos:\ %<%P\     "file position
+set statusline+=\|\ %{strftime('%y%m%e.%H%M')} "show time
