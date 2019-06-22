@@ -30,6 +30,7 @@ set laststatus=2   "always show statusbar
 "resets status line
 set statusline=
 "show path
+set statusline+=Cur\ Dir:\ %{getcwd()}\ 
 set statusline+=\|\ Path:\ %r%F\  
 set statusline+=\|\ Buf:\ %.3n\   "buffer number
 set statusline+=\|\ Flags:\ %h%m%r%w   "status flags
