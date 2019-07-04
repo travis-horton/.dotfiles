@@ -38,4 +38,4 @@ set statusline+=%=   "right align remainder
 set statusline+=\|\ Char:\ 0x%B\    "character value
 set statusline+=\|\ Pos:\ %(%l,%c%V%)\    "line, character
 set statusline+=\|\ File\ Pos:\ %<%P\     "file position
-set statusline+=\|\ %{strftime('%y%m%e.%H%M')} "show time
+set statusline+=\|\ %{strftime('%y%m%d.%Hh%M')} "show time
