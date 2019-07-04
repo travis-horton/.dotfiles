@@ -6,8 +6,8 @@ set -o vi #sets bash commands to vim commands
 alias ll='ls -alFG' #allows ll for long list
 alias lldeep='ls -alFGR'  #allows ll but recursively
 alias cleanupds="find . -type f -name '*.DS_Store' -ls -delete"  #allows cleanupds to get rid of all the .DS_Store
-alias wwwpush="set -x; git add -A; git commit -m \"`mydate`\"; git push; set +x;"   #add, commit, and push in one command
-alias mydate="date \"+%y%m%d.%Hh%m %z %a\""   #print date in format i like
+alias mydate="date '+%y%m%d.%Hh%m %z %a'"   #print date in format i like
+alias wwwpush="set -x; git add -A; git commit -m \"`mydate`\"; git push; set +x"   #add, commit, and push in one command
 
 mkcd() {
   mkdir "$1"
