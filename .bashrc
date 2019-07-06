@@ -9,7 +9,7 @@ alias cleanupds="find . -type f -name '*.DS_Store' -ls -delete"  #allows cleanup
 alias mydate="date '+%y%m%d.%Hh%m %z %a'"   #print date in format i like
 alias wwwpush="set -x; git add -A; git commit -m \"`mydate`\"; git push; set +x"   #add, commit, and push in one command
 
-mkcd() {
+function mkcd() {
   mkdir "$1"
   cd "$1"
 }
