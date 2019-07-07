@@ -8,6 +8,7 @@ alias lldeep='ls -alFGR'  #allows ll but recursively
 alias cleanupds="find . -type f -name '*.DS_Store' -ls -delete"  #allows cleanupds to get rid of all the .DS_Store
 alias mydate="date '+%y%m%d.%Hh%m %z %a'"   #print date in format i like
 alias wwwpush="set -x; git add -A; git commit -m \"`mydate`\"; git push; set +x"   #add, commit, and push in one command
+alias blogpush="set -x; cd ~/blog/; git add -A; git commit -m \"`mydate`\"; git push; set +x"  #add, commit, and push blog
 
 function mkcd() {
   mkdir "$1"
