@@ -11,12 +11,12 @@ alias blogpush="set -x; cd ~/blog/; git add -A; git commit -m \"daily journal `m
 
 #add, commit, and push in one command
 function fullgit() {
-   set -x;
+  set -x;
   git add -A;
   if [ -z "$1" ]
   then
     echo "No commit message given, setting message to: \"`mydate`\"";
-    git commit -m \"`mydate`\";
+    git commit -m mydate;
   else
     git commit -m "$1";
   fi
