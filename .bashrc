@@ -7,7 +7,7 @@ alias ll='ls -alFG' #allows ll for long list
 alias lldeep='ls -alFGR'  #allows ll but recursively
 alias cleanupds="find . -type f -name '*.DS_Store' -ls -delete"  #allows cleanupds to get rid of all the .DS_Store
 alias mydate="date '+%y%m%d.%Hh%m %z %a'"   #print date in format i like
-alias blogpush="set -x; cd ~/blog/; git add -A; git commit -m \"`mydate`\"; git push; set +x"  #add, commit, and push blog
+alias blogpush="set -x; cd ~/blog/; git add -A; git commit -m \"daily journal `mydate`\"; git push; set +x"  #add, commit, and push blog
 
 #add, commit, and push in one command
 function fullgit() {
