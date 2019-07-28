@@ -1,1 +1,6 @@
-/Users/th/.dotfiles/pushblog
+#!/bin/sh
+
+cd ~/blog/
+git add -A
+git commit -m "\"daily journal `date '+%y%m%d.%Hh%m %z %a'`\""
+git push
