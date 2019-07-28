@@ -1,7 +1,7 @@
 export LC_CTYPE=en_US.UTF-8   #sets caps type to US English
 export EDITOR='vim'   #sets editor to vim
 
-export PATH="$HOME/.cargo/bin:$PATH"   #adds rust support to path
+export PATH="$HOME/.bin:$HOME/.cargo/bin:$PATH"   #adds rust support and personal shell scripts to path
 
 set -o vi #sets bash commands to vim commands
 
