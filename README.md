@@ -7,5 +7,5 @@ install apple command line dev tools
 but really just install home-brew
 
 how to use this:
-clone https://github.com/kiddspazz/dotfiles
+clone https://github.com/kiddspazz/dotfiles into $HOME
 run setup.sh

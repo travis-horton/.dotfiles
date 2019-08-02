@@ -1,0 +1,10 @@
+#!/bin/bash
+
+if [ ! -d ~/blog/$(date +%y%m) ]
+then
+  mkdir ~/blog/$(date +%y%m)
+fi
+
+cp -n ~/blog/blogTemplate.html ~/blog/$(date +%y%m)/$(date +%y%m%d).html
+
+vim ~/blog/$(date +%y%m)/$(date +%y%m%d).html
