@@ -17,13 +17,14 @@ then
   rm -r $HOME/.vim/
   mkdir -p $HOME/.vim/swp
 
-  rm $HOME/.bashrc $HOME/.bash_profile $HOME/.vimrc $HOME/.gitconfig $HOME/.npmrc
+  rm $HOME/.bashrc $HOME/.bash_profile $HOME/.vimrc $HOME/.gitconfig $HOME/.npmrc $HOME/.bin
   ln -sf "$HOME/.dotfiles/.bashrc" $HOME/.bashrc 
   ln -sf "$HOME/.dotfiles/.bash_profile" $HOME/.bash_profile
   ln -sf "$HOME/.dotfiles/.vimrc" $HOME/.vimrc
   ln -sf "$HOME/.dotfiles/.gitconfig" $HOME/.gitconfig
   ln -sf "$HOME/.dotfiles/.npmrc" $HOME/.npmrc
-  ln -sf "$HOME/.dotfiles/fullgit" $HOME/.bin
-  ln -sf "$HOME/.dotfiles/pushblog" $HOME/.bin
-  ln -sf "$HOME/.dotfiles/blog" $HOME/.bin
+  mkdir "$HOME/.bin"
+  ln -sf "$HOME/.dotfiles/.bin/fullgit" $HOME/.bin/fullgit
+#need to check if this is my home computer here  ln -sf "$HOME/.dotfiles/pushblog" $HOME/.bin
+#need to check if this is my home computer here  ln -sf "$HOME/.dotfiles/blog" $HOME/blog
 fi

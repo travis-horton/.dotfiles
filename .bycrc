@@ -1,4 +1,4 @@
-find_month() {
+find_FY() {
   if [ "$((`date '+%m'` > 6))" ]
   then
     echo "$((`date '+%y'` + 1))"
@@ -7,7 +7,7 @@ find_month() {
   fi
 }
 
-alias bycFY='echo FY`find_month`'
+alias bycFY='echo FY`find_FY`'
 
 function payroll() {
   cd ~/Tresors/`bycFY`/Payroll/
