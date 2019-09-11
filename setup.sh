@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 read -p "This setup installs the following config files:
 bashrc, bash_profile, vimrc, gitconfig, npmrc, and a vim/swp directory within $HOME
