@@ -2,7 +2,7 @@
 
 starting out on my dotfiles journey. 'it's dangerous to go alone! take this.'  
 
-in case of emergency  
+in case of emergency:  
 install apple command line dev tools ```xcode-select --install```  
 install home-brew  
 
