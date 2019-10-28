@@ -8,6 +8,6 @@ install home-brew
 
 how to use this:  
 clone https://github.com/kiddspazz/dotfiles into $HOME  
-run setup.sh  
+run setup.sh [TODO: needs update post zsh]  
 
 right now this only works for macOS terminal configs -- need to update for linux distros as well
