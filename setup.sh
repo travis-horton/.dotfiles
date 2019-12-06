@@ -37,8 +37,4 @@ then
   then 
     ln -sf "$HOME/.dotfiles/.bin" $HOME/
   fi
-
-  # reloads source
-  source ~/.zshenv
-  source ~/.zshrc
 fi
