@@ -1,6 +1,6 @@
 #!/bin/sh
 
-cd ~/blog/
+cd /Users/th/Documents/writings/journal
 git add -A
 git commit -m "\"daily journal `date '+%y%m%d.%Hh%m %z %a'`\""
 git push

@@ -21,7 +21,7 @@ function mkcd() {
 GIT_PS1_SHOWDIRTYSTATE=true #defines git status
 GIT_PS1_SHOWSTASHSTATE=true #defines git status
 GIT_PS1_SHOWUNTRACKEDFILES=true #defines git status
-PS1='\w$(__git_ps1 " [%s]")\$ ' #prints git status in prompt
+PS1='\D{%y%m%d.%Hh%M} \w$(__git_ps1 " [%s]")\$ ' #prints git status in prompt
 
 if [ -f ~/.bycrc ]; then
    source ~/.bycrc

@@ -1,25 +1,16 @@
-#!/bin/bash
+#!/bin/sh
 
-find_FY() {
-  if [ "$((`date '+%m'` > 6))" ]
-  then
-    echo "$((`date '+%y'` + 1))"
-  else
-    echo `date '+%y'`
-  fi
-}
-
-month=$(date +%m)
 year=$(date +%y)
 
-if [ $month -gt 6 ]; then
+if [ $(date +%m) -gt 6 ]; then
   ((year++))
 fi
-bycFY="FY${year}"
-cd ~/Tresors/${bycFY}/Payroll/
 
+bycFY="FY${year}"
 payroll_date="`date -v+2d '+%y%m%d'`"
 last_payroll_dir="`date -v-12d '+%y%m%d'` PR"
+
+cd ~/Tresors/${bycFY}/Payroll/
 if [ ! -d "$payroll_date PR" ]; then
   mkdir "$payroll_date PR"
   cd "$payroll_date PR"
