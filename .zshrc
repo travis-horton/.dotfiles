@@ -42,6 +42,7 @@ alias zshrc="vim ~/.zshrc"  #easy vim zshrc
 alias zs="source ~/.zshrc"  #easy zshrc source
 alias ga="git add -Ap"    #git add
 alias gc="git commit -m"    #git commit
+alias gp="git push"   #git push
 
 #Function for make and move to dir
 function mkcd() {
