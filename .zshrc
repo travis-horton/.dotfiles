@@ -21,7 +21,7 @@ PR_BOLD_DARK='%F{16}%B'
 PR_BOLD_RED='%F{red}%B'
 PS1='%(!.#.)'
 #The mess at the beginning displays path with / colored red.
-RPS1='${${(%):-%~}//\//${PR_BOLD_RED}/${PR_BOLD_DARK}} | $PR_BOLD_DARK%D{%y%m%d.%H%M%S}%f%b'
+RPS1='${${(%):-%~/}//\//${PR_BOLD_RED}/${PR_BOLD_DARK}} | $PR_BOLD_DARK%D{%y%m%d.%H%M%S}%f%b'
 
 #Right aligned prompt messing
 ##Git status
