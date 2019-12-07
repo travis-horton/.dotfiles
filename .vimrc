@@ -1,5 +1,6 @@
 syntax enable    "enable means it won't override other highlighting (supposedly)
 filetype plugin indent on   "uses file extension to determine indentation
+filetype plugin on
 colorscheme desert
 
 set ai   "autoindent: required for smartindent
@@ -48,4 +49,3 @@ set statusline+=\|\ Char:\ 0x%B\    "character value
 set statusline+=\|\ Pos:\ %(%l,%c%V%)\    "line, character
 set statusline+=\|\ File\ Pos:\ %<%P\     "file position
 set statusline+=\|\ %{strftime('%y%m%d.%Hh%M')} "show time
-
