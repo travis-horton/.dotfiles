@@ -30,8 +30,8 @@ PR_DATE=$(date +%y%m%d.%H%M%S)
 PR_PLAIN_DIR=$(pwd)
 # eventually want to color background green if git status isn't clean
 PR_COLOR_DIR=$(printf "\e[42m $PR_PLAIN_DIR")
-PS1='$PR_BOLD_DARK%D{%y%m%d.%H%M%S} %n on %M in ${${(%):-%/}//\//${PR_BOLD_RED}/${PR_BOLD_DARK}} %(!.#.) %f%b
-'
+PS1=''
+RPS1='$PR_BOLD_DARK%D{%y%m%d.%H%M%S} %n on %M in ${${(%):-%/}//\//${PR_BOLD_RED}/${PR_BOLD_DARK}} %(!.#.) %f%b'
 
 # Right aligned prompt messing
 ## Git status
@@ -44,9 +44,9 @@ zstyle ':vcs_info:git:*' check-for-changes true
 zstyle ':vcs_info:git:*' unstagedstr "UNSTAGED CHANGES!!"
 zstyle ':vcs_info:git:*' stagedstr "UNCOMMITTED CHANGES!!"
 # Git info in prompt with colors
-zstyle ':vcs_info:git:*' formats '%B%F{16}%r - %b %K{green}%u%k%K{red}%c%k%f'
+zstyle ':vcs_info:git:*' formats '%B%F{16}%s: %r - %b %K{green}%u%k%K{red}%c%k%f'
 # Append git info to right aligned prompt
-RPS1=\$vcs_info_msg_0_
+RPS1+=\$vcs_info_msg_0_
 
 # Aliases
 alias cleanupds="find . -type f -name '*.DS_Store' -ls -delete"  #allows cleanupds to get rid of all the .DS_Store
