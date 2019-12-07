@@ -41,7 +41,7 @@ alias cleanupds="find . -type f -name '*.DS_Store' -ls -delete"  #allows cleanup
 alias zshrc="vim ~/.zshrc"  #easy vim zshrc
 alias zs="source ~/.zshrc"  #easy zshrc source
 alias ga="git add -Ap"    #git add
-alias bc="git commit -m"    #git commit
+alias gc="git commit -m"    #git commit
 
 #Function for make and move to dir
 function mkcd() {
