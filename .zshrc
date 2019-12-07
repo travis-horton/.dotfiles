@@ -15,13 +15,27 @@ setopt CORRECT_ALL    #Allows command line correction
 HISTFILE=${ZDOTDIR:-$HOME}/.zsh_history
 setopt EXTENDED_HISTORY
 SAVEHIST=2000
+# share history across multiple zsh sessions
+setopt SHARE_HISTORY
+# append to history
+setopt APPEND_HISTORY
+# adds commands as they are typed, not at shell exit
+setopt INC_APPEND_HISTORY
+# expire duplicates first
+setopt HIST_EXPIRE_DUPS_FIRST
+# do not store duplications
+setopt HIST_IGNORE_DUPS
+#ignore duplicates when searching
+setopt HIST_FIND_NO_DUPS
+# removes blank lines from history
+setopt HIST_REDUCE_BLANKS
 
 #Prompt messing
 PR_BOLD_DARK='%F{16}%B'
 PR_BOLD_RED='%F{red}%B'
 PS1='%(!.#.)'
 #The mess at the beginning displays path with / colored red.
-RPS1='${${(%):-%~/}//\//${PR_BOLD_RED}/${PR_BOLD_DARK}}'
+RPS1='${${(%):-%~}//\//${PR_BOLD_RED}/${PR_BOLD_DARK}}$PR_BOLD_DARK'
 
 #Right aligned prompt messing
 ##Git status
@@ -34,9 +48,9 @@ zstyle ':vcs_info:*' enable git   #Enable git vcs
 zstyle ':vcs_info:git:*' check-for-changes true   #sets check-for-changes
 zstyle ':vcs_info:git:*' unstagedstr "UNSTAGED CHANGES!!"   #sets unstaged string to this
 zstyle ':vcs_info:git:*' stagedstr "UNCOMMITTED CHANGES!!"    #sets staged string to this
-zstyle ':vcs_info:git:*' formats '%B%F{16} | %s: %r - %b %K{green}%u%k%K{red}%c%k%f'   #Git info in prompt with colors
+zstyle ':vcs_info:git:*' formats ' | %s: %r - %b%K{green}%u%k%K{red}%c%k'   #Git info in prompt with colors
 RPS1+=\$vcs_info_msg_0_   #Append git info to right aligned prompt
-RPS1+=' | $PR_BOLD_DARK%D{%y%m%d.%H%M%S}%f%b'
+RPS1+=' | %D{%y%m%d.%H%M%S}%f%b'
 
 #Aliases
 alias cleanupds="find . -type f -name '*.DS_Store' -ls -delete"  #allows cleanupds to get rid of all the .DS_Store
@@ -50,4 +64,12 @@ alias gp="git push"   #git push
 function mkcd() {
   mkdir "$1"
   cd "$1"
+}
+
+#Function for all the updates
+function update() {
+  echo "Updating Homebrew..."
+  brew update
+  echo "Updating npm..."
+  npm update
 }
