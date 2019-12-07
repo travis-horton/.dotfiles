@@ -24,6 +24,12 @@ set tags=tags   "sets tags file
 set ts=2   "set tabstop to 2
 set wildmenu    "shows menu on tab completion
 
+let mapleader=" "   "assign leader key
+
+"sets <leader> h to noh
+map <leader>h :noh<CR>
+"sets <leader> i to make js for loop
+map <leader>i :norm ifor (let i = 0; i < .length; i++) { }<CR>
 "sets jk to esc 
 imap jk <Esc>
 "sets control N to bnext
@@ -44,5 +50,4 @@ set statusline+=\|\ Char:\ 0x%B\    "character value
 set statusline+=\|\ Pos:\ %(%l,%c%V%)\    "line, character
 set statusline+=\|\ File\ Pos:\ %<%P\     "file position
 set statusline+=\|\ %{strftime('%y%m%d.%Hh%M')} "show time
-
 
