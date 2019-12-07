@@ -19,7 +19,7 @@ SAVEHIST=2000
 #Prompt messing
 PR_BOLD_DARK='%F{16}%B'
 PR_BOLD_RED='%F{red}%B'
-PS1='%(!.#.)%U'
+PS1='%(!.#.)'
 #The mess at the beginning displays path with / colored red.
 RPS1='${${(%):-%~/}//\//${PR_BOLD_RED}/${PR_BOLD_DARK}}'
 
