@@ -16,7 +16,6 @@ then
 
   # create .vim/swp/ (-p makes parent dirs if necessary)
   rm -rv $HOME/vim/
-  rm -rv $HOME/.vim/
   mkdir -p $HOME/.vim/swp
 
   # removes all previously existing config/profile files that will be created
