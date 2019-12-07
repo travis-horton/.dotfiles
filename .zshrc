@@ -33,7 +33,7 @@ zstyle ':vcs_info:*' enable git   #Enable git vcs
 zstyle ':vcs_info:git:*' check-for-changes true   #sets check-for-changes
 zstyle ':vcs_info:git:*' unstagedstr "UNSTAGED CHANGES!!"   #sets unstaged string to this
 zstyle ':vcs_info:git:*' stagedstr "UNCOMMITTED CHANGES!!"    #sets staged string to this
-zstyle ':vcs_info:git:*' formats '%B%F{16}%s: %r - %b %K{green}%u%k%K{red}%c%k%f'   #Git info in prompt with colors
+zstyle ':vcs_info:git:*' formats '%B%F{16} | %s: %r - %b %K{green}%u%k%K{red}%c%k%f'   #Git info in prompt with colors
 RPS1+=\$vcs_info_msg_0_   #Append git info to right aligned prompt
 
 #Aliases
