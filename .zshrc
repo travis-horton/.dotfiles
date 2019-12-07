@@ -21,7 +21,7 @@ PR_BOLD_DARK='%F{16}%B'
 PR_BOLD_RED='%F{red}%B'
 PS1='%(!.#.)'
 #The mess at the beginning displays path with / colored red.
-RPS1='${${(%):-%~/}//\//${PR_BOLD_RED}/${PR_BOLD_DARK}} | $PR_BOLD_DARK%D{%y%m%d.%H%M%S}%f%b'
+RPS1='${${(%):-%~/}//\//${PR_BOLD_RED}/${PR_BOLD_DARK}}'
 
 #Right aligned prompt messing
 ##Git status
@@ -35,6 +35,7 @@ zstyle ':vcs_info:git:*' unstagedstr "UNSTAGED CHANGES!!"   #sets unstaged strin
 zstyle ':vcs_info:git:*' stagedstr "UNCOMMITTED CHANGES!!"    #sets staged string to this
 zstyle ':vcs_info:git:*' formats '%B%F{16} | %s: %r - %b %K{green}%u%k%K{red}%c%k%f'   #Git info in prompt with colors
 RPS1+=\$vcs_info_msg_0_   #Append git info to right aligned prompt
+RPS1+=' | $PR_BOLD_DARK%D{%y%m%d.%H%M%S}%f%b'
 
 #Aliases
 alias cleanupds="find . -type f -name '*.DS_Store' -ls -delete"  #allows cleanupds to get rid of all the .DS_Store
