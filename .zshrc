@@ -28,6 +28,7 @@ RPS1='${${(%):-%~/}//\//${PR_BOLD_RED}/${PR_BOLD_DARK}}'
 #Load zsh version control info
 autoload -Uz vcs_info
 precmd_vcs_info() { vcs_info }
+precmd_functions+=( precmd_vcs_info )   # I don't know what this does, but it seems to help...
 
 zstyle ':vcs_info:*' enable git   #Enable git vcs
 zstyle ':vcs_info:git:*' check-for-changes true   #sets check-for-changes
