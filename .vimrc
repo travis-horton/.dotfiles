@@ -12,7 +12,7 @@ set incsearch   "searches as you type
 set hidden   "keeps vim from warnings on new buffer
 set hlsearch   "highlights all finds
 set nocompatible   "takes out archaic vim
-set number   "show line numbers
+set nu rnu "show hybrid line numbers (number relativenumber)
 set path+=**    "allows recursive subdirectory searches
 set ruler   "show cursoer position [row, col] in bottom right
 set sw=2   "shiftwidth: how many spaces tabs equal
