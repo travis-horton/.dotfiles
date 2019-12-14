@@ -29,6 +29,8 @@ let mapleader=" "   "assign leader key
 map <leader>h :noh<CR>
 "sets <leader> i to make js for loop
 map <leader>i :norm ifor (let i = 0; i < .length; i++) { }<CR>
+"set <leader RETURN to wq!>
+map <leader><CR> :wq!<CR>
 "sets jk to esc 
 imap jk <Esc>
 "sets control N to bnext
