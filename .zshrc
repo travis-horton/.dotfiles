@@ -29,6 +29,8 @@ setopt HIST_IGNORE_DUPS
 setopt HIST_FIND_NO_DUPS
 # removes blank lines from history
 setopt HIST_REDUCE_BLANKS
+# turn on more powerful auto-completion
+autoload -Uz compinit && compinit
 # case insensitive path-completion
 zstyle ':completion:*' matcher-list 'm:{[:lower:][:upper:]}={[:upper:][:lower:]}' 'm:{[:lower:][:upper:]}={[:upper:][:lower:]} l:|=* r:|=*' 'm:{[:lower:][:upper:]}={[:upper:][:lower:]} l:|=* r:|=*' 'm:{[:lower:][:upper:]}={[:upper:][:lower:]} l:|=* r:|=*'
 # partial completion suggestions
@@ -59,6 +61,7 @@ RPS1+=' | %D{%y%m%d.%H%M%S}%f%b'
 
 #Aliases
 alias cleanupds="find . -type f -name '*.DS_Store' -ls -delete"  #allows cleanupds to get rid of all the .DS_Store
+alias tree="tree -lCF"  #makes tree colorized, follow symbolic links, and show trailing char for types
 alias zshrc="vim ~/.zshrc"  #easy vim zshrc
 alias zs="source ~/.zshrc"  #easy zshrc source
 alias ga="git add -Ap"    #git add
