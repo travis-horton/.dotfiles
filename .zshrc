@@ -61,7 +61,7 @@ RPS1+=' | %D{%y%m%d.%H%M%S}%f%b'
 
 #Aliases
 alias cleanupds="find . -type f -name '*.DS_Store' -ls -delete"  #allows cleanupds to get rid of all the .DS_Store
-alias tree="tree -lCF"  #makes tree colorized, follow symbolic links, and show trailing char for types
+alias t="tree -lCF"  #makes tree colorized, follow symbolic links, and show trailing char for types
 alias zshrc="vim ~/.zshrc"  #easy vim zshrc
 alias zs="source ~/.zshrc"  #easy zshrc source
 alias ga="git add -Ap"    #git add
