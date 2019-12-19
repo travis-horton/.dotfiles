@@ -1,0 +1,3 @@
+#!/bin/sh
+
+scp -i ~/.ssh/id_rsa -r $1 th@travish.com:/var/www/kiddspazz/
