@@ -65,7 +65,7 @@ alias t='tree -alCF -I ".git|node_modules|dist|target|.cache"'  #makes tree colo
 alias zshrc="vim ~/.zshrc"  #easy vim zshrc
 alias zs="source ~/.zshrc"  #easy zshrc source
 alias ga="git add -Ap"    #git add
-alias gc="git commit -m"    #git commit
+alias gc="git commit"    #git commit
 alias gp="git push"   #git push
 
 #Function for make and move to dir
