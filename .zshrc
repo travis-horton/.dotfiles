@@ -67,6 +67,7 @@ alias zs="source ~/.zshrc"  #easy zshrc source
 alias ga="git add -Ap"    #git add
 alias gc="git commit"    #git commit
 alias gp="git push"   #git push
+alias nodegitignore="curl https://raw.githubusercontent.com/github/gitignore/master/Node.gitignore >> .gitignore "    # makes a .gitignore file from the github node gitignore template
 
 #Function for make and move to dir
 function mkcd() {
