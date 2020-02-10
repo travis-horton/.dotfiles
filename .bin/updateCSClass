@@ -1,0 +1,11 @@
+scp -ri ~/.ssh/id_rsa $( cat ~/Documents/classes/CofI/CofI_CSC490/cocalc_location.md ):~/CSC-490-DesignPatterns ~/Documents/classes/CofI/CofI_CSC490/CSC-490-DesignPatterns 
+
+cp -R ~/Documents/classes/CofI/CofI_CSC490/CSC490/ ~/Documents/classes/CofI/CofI_CSC490/CSC-490-DesignPatterns
+
+rm -r ~/Documents/classes/CofI/CofI_CSC490/CSC490
+
+mv -f ~/Documents/classes/CofI/CofI_CSC490/CSC-490-DesignPatterns ~/Documents/classes/CofI/CofI_CSC490/CSC490
+
+rm -d "~/Documents/classes/CofI/CofI_CSC490/CSC490 2"
+
+scp -ri ~/.ssh/id_rsa ~/Documents/classes/CofI/CofI_CSC490/CSC490 $( cat ~/Documents/classes/CofI/CofI_CSC490/cocalc_location.md ):~/
