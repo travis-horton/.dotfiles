@@ -38,11 +38,11 @@ zstyle ':completion:*' list-suffixes
 zstyle ':completion:*' expand prefix suffix
 
 #Prompt messing
-PR_BOLD_YELLOW='%F{yellow}'
+PR_BOLD_YELLOW='%F{226}'
 PR_BOLD_RED='%F{red}%B'
 PS1='%(!.#.)'
 #The mess at the beginning displays path with / colored red.
-RPS1='${${(%):-%~}//\//${PR_BOLD_RED}/${PR_BOLD_YELLOW}}$PR_BOLD_YELLOW'
+RPS1='${${(%):-%~}//\//${PR_BOLD_RED}/%b${PR_BOLD_YELLOW}}%b$PR_BOLD_YELLOW'
 
 #Right aligned prompt messing
 ##Git status
