@@ -1,7 +1,7 @@
 syntax enable    "enable means it won't override other highlighting (supposedly)
 filetype plugin indent on   "uses file extension to determine indentation
 filetype plugin on
-colorscheme desert
+colorscheme zellner
 
 set ai   "autoindent: required for smartindent
 set directory=~/.vim/swp   "puts all swp files in this ~/.vim/swp instead of local
