@@ -12,7 +12,7 @@ set incsearch   "searches as you type
 set hidden   "keeps vim from warnings on new buffer
 set hlsearch   "highlights all finds
 set nocompatible   "takes out archaic vim
-set nu rnu "show hybrid line numbers (number relativenumber)
+set rnu "show hybrid line numbers (200219 took out 'hybrid' part (relativenumber)
 set path+=**    "allows recursive subdirectory searches
 set ruler   "show cursoer position [row, col] in bottom right
 set sw=2   "shiftwidth: how many spaces tabs equal
@@ -21,6 +21,7 @@ set smarttab   "makes tab use shiftwidth instead of tabstop or softtabstop
 set sts=2   "set softtabstop to 2
 set tags=tags   "sets tags file
 set ts=2   "set tabstop to 2
+set tw=100   "set text width to wrap at 100 chars
 set wildmenu    "shows menu on tab completion
 
 let mapleader=" "   "assign leader key
