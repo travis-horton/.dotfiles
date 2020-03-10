@@ -1,6 +1,8 @@
+'it's dangerous to go alone! take this.'
+
 # .dotfiles  
 
-starting out on my dotfiles journey. 'it's dangerous to go alone! take this.'  
+starting out on my dotfiles journey.  
 
 in case of emergency:  
 install apple command line dev tools ```xcode-select --install```  
