@@ -1,10 +1,10 @@
 #!/bin/sh
 
-if [ ! -d ~/blog/$(date +%y%m) ] then
+if [ ! -d ~/blog/$(date +%y%m) ]; then
   mkdir ~/blog/$(date +%y%m)
 fi
 
-if [ ! -f ~/blog/$(date +%y%m)/$(date +%y%m%d) ] then
+if [ ! -f ~/blog/$(date +%y%m)/$(date +%y%m%d).html ]; then
   cp -n ~/blog/blogTemplate.html ~/blog/$(date +%y%m)/$(date +%y%m%d).html
   vim ~/blog/$(date +%y%m)/$(date +%y%m%d).html
 else
