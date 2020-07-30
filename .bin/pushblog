@@ -2,5 +2,5 @@
 
 cd /Users/th/Documents/writings/journal
 git add -A
-git commit -m "\"daily journal `date '+%y%m%d.%Hh%M %z %a'`\""
+git commit -m "\"daily journal `date '+%y.%m%d.%Hh%M %z %a'`\""
 git push
