@@ -7,8 +7,8 @@ if [ $(date +%m) -gt 6 ]; then
 fi
 
 bycFY="FY${year}"
-payroll_date="`date -v+2d '+%y%m%d'`"
-last_payroll_dir="`date -v-12d '+%y%m%d'` PR"
+payroll_date="`date -v+2d '+%y.%m%d'`"
+last_payroll_dir="`date -v-12d '+%y.%m%d'` PR"
 
 cd ~/Tresors/${bycFY}/Payroll/
 if [ ! -d "$payroll_date PR" ]; then
