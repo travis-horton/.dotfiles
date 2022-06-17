@@ -1,17 +1,27 @@
-'it's dangerous to go alone! take this.'
+'It's dangerous to go alone! Take this.'
 
 # .dotfiles
 
-starting out on my dotfiles journey
+Starting out on my dotfiles journey
 
-in case of emergency:
-install apple command line dev tools ```xcode-select --install```
-install home-brew
+### In case of emergency:
+Install apple command line dev tools
+```
+xcode-select --install
+```
 
-how to use this
-[TODO: needs update post zsh]
-clone https://github.com/kiddspazz/dotfiles into $HOME
-run setup.s
+Install home-brew:
+```
+/bin/bash -c "$(curl -fsSL \ https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
 
-right now this only works for macOS terminal configs -- need to update for
-linux distros as well
+### How to use this:
+In the `$HOME` dir:
+```
+git clone `https://github.com/kiddspazz/dotfiles
+```
+Other steps...tbd
+
+### TODO: Other stuff to get truly set update, probably including:
+Get vim plugins
+Write a little script to create symlinks for things in .bin and .zsh configs
