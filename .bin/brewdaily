@@ -1,9 +1,0 @@
-#!/bin/sh
-
-echo `date`;
-echo "Upgrading homebrew";
-/usr/local/bin/brew upgrade;
-echo "Updating homebrew";
-/usr/local/bin/brew update;
-echo "Cleanup homebrew";
-/usr/local/bin/brew cleanup;

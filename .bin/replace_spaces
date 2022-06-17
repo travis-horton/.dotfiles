@@ -1,3 +1,0 @@
-#!/bin/sh
-
-find -ds . -name "* *" -exec bash -c 'mv "$0" "${0// /_}"' {} \;

@@ -1,3 +1,0 @@
-#!/bin/sh
-
-echo "You're not in vim anymore, Toto.";
