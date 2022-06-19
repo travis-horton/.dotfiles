@@ -7,6 +7,8 @@ xargs brew install < ${HOME}/.dotfiles/brew_packages_to_install.txt
 
 brew upgrade
 
+npm install --global yarn
+
 # check git command
 if type git; then
   : # You have git command. No Problem.

@@ -4,7 +4,7 @@ ln -vsf ${HOME}/.dotfiles/.config/nvim/init.vim ${HOME}/.config/nvim/init.vim
 ln -vsf ${HOME}/.dotfiles/.config/nvim/coc-settings.json \
   ${HOME}/.config/nvim/coc-settings.json
 
-PLUGIN_DIR = ${HOME}/.config/nvim
+PLUGIN_DIR=${HOME}/.config/nvim
 
 mkdir -p ${PLUGIN_DIR}/autoload ${PLUGIN_DIR}/bundle && \
 curl -LSso ${PLUGIN_DIR}/autoload/pathogen.vim https://tpo.pe/pathogen.vim
