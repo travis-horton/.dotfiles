@@ -47,6 +47,10 @@ autocmd BufLeave *.{js,jsx,ts,tsx} :syntax sync clear
 let g:markdown_folding=1    " this is for folding in markdown
 autocmd BufRead,BufNewFile *.py let python_highlight_all=1
 
+" Keep nvim `:checkhealth` from complaining about ruby or perl
+let g:loaded_ruby_provider = 0
+let g:loaded_perl_provider = 0
+
 " --------------------------------------------------------
 "  STATUS LINE CONFIGURATION START
 set statusline=                                         "resets status line

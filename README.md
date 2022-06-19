@@ -4,24 +4,16 @@
 
 Starting out on my dotfiles journey
 
-### In case of emergency:
-Install apple command line dev tools
-```
-xcode-select --install
-```
-
-Install home-brew:
-```
-/bin/bash -c "$(curl -fsSL \ https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-```
-
-### How to use this:
+## In case of emergency:
 In the `$HOME` dir:
 ```
-git clone `https://github.com/kiddspazz/dotfiles
+git clone https://github.com/kiddspazz/dotfiles
 ```
-Other steps...tbd
+then:
+```
+bash ./.dotfiles/installer.sh
+```
 
-### TODO: Other stuff to get truly set update, probably including:
-Get vim plugins
-Write a little script to create symlinks for things in .bin and .zsh configs
+This installer script installs xcode dev tools, then installs brew, and then
+installs a bunch of brew packages (found in `brew_packages_to_install.txt`), and
+finally runs my vim setup script.
