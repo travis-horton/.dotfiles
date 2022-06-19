@@ -51,7 +51,7 @@ autocmd BufRead,BufNewFile *.py let python_highlight_all=1
 "  STATUS LINE CONFIGURATION START
 set statusline=                                         "resets status line
 set statusline+=%{substitute(getcwd(),$HOME,'~','')}    "show curr dir
-set statusline+=%r%f\                                   "show current file
+set statusline+=\/%r%f\                                 "show current file
 set statusline+=\|\ Flags:\ %h%m%r%w                    "status flags
 set statusline+=%=                                      "right align remainder
 set statusline+=%(%l,%c%V%)\                            "line, char
@@ -78,8 +78,11 @@ map <C-k> <C-W>k
 map <C-h> <C-W>h
 map <C-l> <C-W>l
 
-" user ctrlp for Telescope
+" use ctrlp for Telescope
 map <C-p> :Telescope<CR>
+
+" leader u for undo tree
+map <leader>u :UndotreeToggle<CR>
 
 "  MAPPINGS END
 " --------------------------------------------------------

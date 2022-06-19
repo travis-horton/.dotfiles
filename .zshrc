@@ -3,13 +3,13 @@ alias l="exa --long --git --tree --level=1 --classify --all \
   --group-directories-first --header --group"
 alias ll="exa --long --git --tree --level=2 --classify --all \
   --group-directories-first --header --group \
-  --ignore-glob='node_modules*|dist*|.parcel-cache*'"
+  --ignore-glob='node_modules*|dist*|.parcel-cache*|.git'"
 alias lll="exa --long --git --tree --level=3 --classify --all \
   --group-directories-first --header --group \
-  --ignore-glob='node_modules*|dist*|.parcel-cache*'"
+  --ignore-glob='node_modules*|dist*|.parcel-cache*|.git'"
 alias llll="exa --long --git --tree --level=4 --classify --all \
   --group-directories-first --header --group \
-  --ignore-glob='node_modules*|dist*|.parcel-cache*'"
+  --ignore-glob='node_modules*|dist*|.parcel-cache*|.git'"
 
 export EDITOR="nvim"                  # Sets neovim as editor
 alias vi="nvim"                       # Opens neovim instead of vim
