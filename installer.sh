@@ -3,6 +3,10 @@ xcode-select --install
 /bin/bash -c "$(curl -fsSL \
   https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
+ln -vsf ${HOME}/.dotfiles/.zprofile ${HOME}/.zprofile
+ln -vsf ${HOME}/.dotfiles/.zshenv ${HOME}/.zshenv
+ln -vsf ${HOME}/.dotfiles/.zshrc ${HOME}/.zshrc
+
 xargs brew install < ${HOME}/.dotfiles/brew_packages_to_install.txt
 
 brew upgrade

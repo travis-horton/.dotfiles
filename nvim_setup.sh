@@ -35,6 +35,12 @@ cd ${PLUGIN_DIR}/bundle/telescope.nvim
 git pull
 cd ~
 
+## The following are requirements for telescope:
+git clone https://github.com/nvim-lua/plenary.nvim \
+  ${PLUGIN_DIR}/bundle/plenary
+git clone https://github.com/nvim-treesitter/nvim-treesitter
+  ${PLUGIN_DIR}/bundle/nvim-treesitter
+
 ## fugitive is for git commands in vim
 git clone https://github.com/tpope/vim-fugitive \
   ${PLUGIN_DIR}/bundle/vim-fugitive
