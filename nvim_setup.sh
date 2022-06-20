@@ -19,6 +19,7 @@ git pull
 yarn install;
 cd ~;
 
+## This doesn't seem to work?
 nvim -c "CocInstall coc-html \
   | CocInstall coc-tsserver \
   | CocInstall coc-rust-analyzer \
