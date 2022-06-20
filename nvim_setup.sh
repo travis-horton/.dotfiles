@@ -24,6 +24,7 @@ nvim -c "CocInstall coc-html \
   | CocInstall coc-rust-analyzer \
   | CocInstall coc-pyright \
   | CocInstall coc-json \
+  | CocInstall coc-html \
   | q
 "
 
@@ -57,7 +58,7 @@ cd ${PLUGIN_DIR}/bundle/undotree
 git pull
 cd ~
 
-## The following are for syntax highlighting
+## The following are for coc autocomplete
 git clone https://github.com/rust-lang/rust.vim.git \
   ${PLUGIN_DIR}/bundle/rust.vim
 ## update
@@ -91,13 +92,6 @@ git clone https://github.com/peitalin/vim-jsx-typescript \
   ${PLUGIN_DIR}/bundle/vim-jsx-typescript
 ## update
 cd ${PLUGIN_DIR}/bundle/vim-jsx-typescript
-git pull
-cd ~
-
-git clone https://github.com/fannheyward/coc-styled-components \
-  ${PLUGIN_DIR}/bundle/coc-styled-components
-## update
-cd ${PLUGIN_DIR}/bundle/coc-styled-components
 git pull
 cd ~
 
