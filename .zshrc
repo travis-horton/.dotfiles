@@ -52,7 +52,7 @@ alias zs="source ~/.zshrc"                         # Easy zshrc source
 alias ga="git add -Ap"                             # Git add
 alias gc="git commit"                              # Git commit
 alias gp="git push"                                # Git push
-alias gb="git branch -a"                           # Show git branches
+alias gb="git branch"                              # Show git branches
 alias gg="git graph"                               # Git push
 alias gco="git checkout"                           # Git checkout
 
@@ -65,3 +65,13 @@ alias rustdoc="rustup doc --toolchain=stable-x86_64-apple-darwin"
 alias cleanupds="find . -type f -name '*.DS_Store' -ls -delete;"
 
 alias rg="nocorrect rg"
+
+# These are for/from honor work -- feel free to delete if I'm not working there
+# anymore.
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+
+# This loads nvm bash_completion
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+
+source $HOME/.h4.zshrc

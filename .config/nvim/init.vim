@@ -10,7 +10,6 @@ set foldmethod=indent
 set colorcolumn=80
 set backspace=indent,eol,start
 set incsearch
-set nohlsearch
 set scrolloff=8
 
 set list
@@ -31,12 +30,14 @@ set splitright
 set hidden      " this needs to be set for coc
 
 set expandtab
-set shiftwidth=2
-set tabstop=2
+set shiftwidth=4
+set tabstop=4
 set textwidth=80
 
 set laststatus=2
 set wildmenu
+
+colorscheme PaperColor
 
 " Large js files syntax highlighting can get out of sync. This forces rescan of
 " the entire buffer when highlighting. (In vanilla vim that would be a
@@ -70,6 +71,7 @@ set statusline+=\|\ %{strftime('%y%m%d.%Hh%M')}         "show time
 let mapleader=" "
 
 map <leader><CR> :wq!<CR>
+map <leader>h :noh<CR>
 imap jk <Esc>
 
 " moving between buffers:

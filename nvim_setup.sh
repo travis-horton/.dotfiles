@@ -96,4 +96,11 @@ cd ${PLUGIN_DIR}/bundle/vim-jsx-typescript
 git pull
 cd ~
 
+git clone https://github.com/solarnz/thrift.vim \
+  ${PLUGIN_DIR}/bundle/thrift.vim
+## update
+cd ${PLUGIN_DIR}/bundle/thrift.vim
+git pull
+cd ~
+
 nvim -c "helptags ALL | q"

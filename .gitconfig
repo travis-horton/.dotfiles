@@ -1,0 +1,19 @@
+[user]
+    name = Travis Horton
+    email = travis.horton@joinhonor.com
+[alias]
+    graph = log --graph --pretty=oneline --abbrev-commit --all --decorate
+[branch "master"]
+    pushRemote = no_push
+[branch "main"]
+    pushRemote = no_push
+[rebase]
+	autoStash = true
+[core]
+	editor = nvim
+[submodule]
+	recurse = true
+[push]
+	recurseSubmodules = check
+[status]
+	submoduleSummary = true
