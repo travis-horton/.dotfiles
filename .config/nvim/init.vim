@@ -1,6 +1,5 @@
 syntax on
 filetype plugin indent on   "uses file extension to determine indentation
-colorscheme default
 
 set encoding=utf-8
 
@@ -10,7 +9,7 @@ set foldmethod=indent
 set colorcolumn=80
 set backspace=indent,eol,start
 set incsearch
-set nohlsearch
+set hlsearch
 set scrolloff=8
 
 set list
@@ -22,7 +21,7 @@ set ruler
 
 set viminfo=""
 set noswapfile
-set undodir=$HOME/.vim/undo
+set undodir=$HOME/.config/nvim/undo
 set undofile
 
 set path+=**
@@ -37,6 +36,12 @@ set textwidth=80
 
 set laststatus=2
 set wildmenu
+
+colorscheme PaperColor
+
+" Set textwidth to 99 and colorcolumn to 100 for rust files
+autocmd FileType rust setlocal colorcolumn=100
+autocmd FileType rust setlocal textwidth=99
 
 " Large js files syntax highlighting can get out of sync. This forces rescan of
 " the entire buffer when highlighting. (In vanilla vim that would be a
@@ -71,6 +76,7 @@ let mapleader=" "
 
 map <leader><CR> :wq!<CR>
 imap jk <Esc>
+map <leader>h :nohl<CR>
 
 " moving between buffers:
 nnoremap <C-n> :bnext<CR>
@@ -115,6 +121,16 @@ nmap <silent> gd :vsplit<CR><Plug>(coc-definition)
 nmap <silent> gy :vsplit<CR><Plug>(coc-type-definition)
 nmap <silent> gi :vsplit<CR><Plug>(coc-implementation)
 nmap <silent> gr :vsplit<CR><Plug>(coc-references)
+
+" Install the following coc extensions
+let g:coc_global_extensions = [
+  \ 'coc-html',
+  \ 'coc-tsserver',
+  \ 'coc-rust-analyzer',
+  \ 'coc-pyright',
+  \ 'coc-json',
+  \ 'coc-html',
+\]
 
 " coc-vim SETTINGS END
 " --------------------------------------------------------

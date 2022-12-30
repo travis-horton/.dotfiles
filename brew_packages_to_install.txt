@@ -1,6 +1,7 @@
 bat
 exa
 fd
+git-delta
 lua
 neovim
 node
