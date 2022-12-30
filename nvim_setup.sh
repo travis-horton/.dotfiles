@@ -28,12 +28,17 @@ ln -vsf ${HOME}/.dotfiles/.config/nvim/coc-settings.json \
 PLUGIN_DIR=${HOME}/.config/nvim;
 set +x;
 
-echo "\n-----------------------------------------------------------";
-echo "------- CREATE AUTOLOAD AND BUNDLE IN CONFIG NVIM ---------";
-echo "--------------- AND THEN INSTALL PATHOGEN -----------------";
-echo "-----------------------------------------------------------";
+echo "\n------------------------------------------------------------------------";
+echo "------- CREATE AUTOLOAD, BUNDLE, AND COLOR DIRS IN CONFIG NVIM ---------";
+echo "------------------------------------------------------------------------";
 set -x;
-mkdir -p ${PLUGIN_DIR}/autoload ${PLUGIN_DIR}/bundle && \
+mkdir -p ${PLUGIN_DIR}/autoload ${PLUGIN_DIR}/bundle ${PLUGIN_DIR}/colors
+set +x;
+
+echo "\n--------------------------------------------------";
+echo "--------------- INSTALL PATHOGEN -----------------";
+echo "--------------------------------------------------";
+set -x;
 curl -LSso ${PLUGIN_DIR}/autoload/pathogen.vim https://tpo.pe/pathogen.vim;
 set +x;
 
@@ -183,6 +188,14 @@ set -x;
 cd ${PLUGIN_DIR}/bundle/undotree;
 git pull;
 cd ~;
+set +x;
+
+echo "\n-----------------------------------------------------------------------";
+echo "------- INSTALL PAPER COLOR (my current preferred color scheme) -------";
+echo "-----------------------------------------------------------------------";
+set -x;
+curl -o ${PLUGIN_DIR}/colors/PaperColor.vim \
+  https://raw.githubusercontent.com/NLKNguyen/papercolor-theme/master/colors/PaperColor.vim;
 set +x;
 
 echo "\n---------------------------------------";

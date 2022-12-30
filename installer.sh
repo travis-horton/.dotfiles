@@ -27,6 +27,20 @@ ln -vsf ${HOME}/.dotfiles/.zshenv ${HOME}/.zshenv;
 ln -vsf ${HOME}/.dotfiles/.zshrc ${HOME}/.zshrc;
 set +x;
 
+echo "\n-----------------------------------";
+echo "------- SYMLINK GIT CONFIG --------";
+echo "-----------------------------------";
+set -x;
+ln -vsf ${HOME}/.dotfiles/.gitconfig ${HOME}/.gitconfig;
+set +x;
+
+echo "\n-----------------------------------";
+echo "------- SYMLINK PSQL CONFIG --------";
+echo "-----------------------------------";
+set -x;
+ln -vsf ${HOME}/.dotfiles/.psqlrc ${HOME}/.psqlrc;
+set +x;
+
 echo "\n------------------------------------------------";
 echo "------- INSTALL BREW PACKAGES FROM LIST:";
 cat ${HOME}/.dotfiles/brew_packages_to_install.txt;
@@ -47,6 +61,15 @@ echo "------- INSTALL YARN --------";
 echo "-----------------------------";
 set -x;
 npm install --global yarn;
+set +x;
+
+echo "\n-----------------------------------------------";
+echo "------- INSTALL A FEW GLOBAL YARN DEPS --------";
+echo "--------------- (jest, neovim) ----------------";
+echo "-----------------------------------------------";
+set -x;
+yarn global add jest
+yarn global add neovim
 set +x;
 
 # check git command
