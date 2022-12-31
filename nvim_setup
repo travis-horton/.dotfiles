@@ -1,3 +1,5 @@
+#!/bin/zsh
+
 # Print a full horizontal line of dashes
 printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -;
 echo "----------------------------";

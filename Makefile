@@ -1,2 +1,2 @@
 all: 
-	${HOME}/.dotfiles/installer.sh
+	${HOME}/.dotfiles/installer

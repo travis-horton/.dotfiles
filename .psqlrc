@@ -1,0 +1,20 @@
+\set PROMPT1 '%M:%[%033[1;31m%]%>%[%033[0m%] %n@%/%R%#%x '
+
+\set PROMPT2 '%M %n@%/%R %# '
+
+\pset null '[null]'
+
+\set COMP_KEYWORD_CASE upper
+
+\timing
+
+\set HISTSIZE 2000
+
+\x on
+
+\pset pager always
+
+\set VERBOSITY verbose
+
+\echo 'Welcome to PostgreSQL! \n'
+\echo 'Type \\q to exit. \n'

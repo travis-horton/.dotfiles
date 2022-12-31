@@ -1,3 +1,5 @@
+#!/bin/zsh
+
 # Print a full horizontal line of dashes
 printf '\n\n%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -;
 echo "------------------------------";
@@ -25,7 +27,14 @@ set -x;
 ln -vsf ${HOME}/.dotfiles/.zprofile ${HOME}/.zprofile;
 ln -vsf ${HOME}/.dotfiles/.zshenv ${HOME}/.zshenv;
 ln -vsf ${HOME}/.dotfiles/.zshrc ${HOME}/.zshrc;
+# We need a $HOME/.cargo/env to source these configs (it is referenced...)
+mkdir ${HOME}/.cargo
+ln -vsf ${HOME}/.dotfiles/cargo_env ${HOME}/.cargo/env
 set +x;
+echo "'set +x' cause you don't want to see the source outputs...";
+source ${HOME}/.zprofile
+source ${HOME}/.zshenv
+source ${HOME}/.zshrc
 
 echo "\n-----------------------------------";
 echo "------- SYMLINK GIT CONFIG --------";
@@ -83,4 +92,4 @@ fi
 echo "\n------------------------------";
 echo "------- RUN VIM SETUP --------";
 echo "------------------------------\n";
-/bin/zsh ${HOME}/.dotfiles/nvim_setup.sh;
+/bin/zsh ${HOME}/.dotfiles/nvim_setup;
