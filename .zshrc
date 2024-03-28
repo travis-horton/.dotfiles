@@ -3,13 +3,16 @@ alias l="exa --long --git --tree --level=1 --classify --all \
   --group-directories-first --header --group"
 alias ll="exa --long --git --tree --level=2 --classify --all \
   --group-directories-first --header --group \
-  --ignore-glob='node_modules*|dist*|.parcel-cache*|.git'"
+  --ignore-glob='node_modules*|dist*|.parcel-cache*|.git|undodir'"
 alias lll="exa --long --git --tree --level=3 --classify --all \
   --group-directories-first --header --group \
-  --ignore-glob='node_modules*|dist*|.parcel-cache*|.git'"
+  --ignore-glob='node_modules*|dist*|.parcel-cache*|.git|undodir'"
 alias llll="exa --long --git --tree --level=4 --classify --all \
   --group-directories-first --header --group \
-  --ignore-glob='node_modules*|dist*|.parcel-cache*|.git'"
+  --ignore-glob='node_modules*|dist*|.parcel-cache*|.git|undodir'"
+alias lllll="exa --long --git --tree --level=5 --classify --all \
+  --group-directories-first --header --group \
+  --ignore-glob='node_modules*|dist*|.parcel-cache*|.git|undodir'"
 
 export EDITOR="nvim"                  # Sets neovim as editor
 alias vi="nvim"                       # Opens neovim instead of vim
@@ -29,20 +32,11 @@ setopt SHARE_HISTORY                  # Shares history between zsh sessions
 
 SAVEHIST=2000                         # Sets history size
 
-autoload -Uz compinit && compinit     # Turn on more powerful auto-completion
-
-# case insensitive path-completion
-zstyle ':completion:*' matcher-list \
-  'm:{[:lower:][:upper:]}={[:upper:][:lower:]}' \
-  'm:{[:lower:][:upper:]}={[:upper:][:lower:]} l:|=* r:|=*' \
-  'm:{[:lower:][:upper:]}={[:upper:][:lower:]} l:|=* r:|=*' \
-  'm:{[:lower:][:upper:]}={[:upper:][:lower:]} l:|=* r:|=*'
-
-# partial completion suggestions
-zstyle ':completion:*' list-suffixes
-zstyle ':completion:*' expand prefix suffix
-
 PS1="%~; "
+
+# show autocomplete options
+source ~/.config/zsh-autocomplete/zsh-autocomplete.plugin.zsh
+setopt globdots
 
 #Aliases
 alias zshrc="vim ~/.zshrc"                         # Easy vim zshrc
@@ -65,3 +59,12 @@ alias rustdoc="rustup doc --toolchain=stable-x86_64-apple-darwin"
 alias cleanupds="find . -type f -name '*.DS_Store' -ls -delete;"
 
 alias rg="nocorrect rg"
+alias cat="bat"
+
+export PATH=$PATH:~/zig
+
+# Fun stuff
+alias weather="curl wttr.in/83704\?m"
+alias playdf="open ~/Applications/Wineskin/df.app"
+
+eval "$(zoxide init --cmd cd zsh)"
