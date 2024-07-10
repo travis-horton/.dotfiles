@@ -50,7 +50,7 @@ alias gb="git branch -a"                           # Show git branches
 alias gg="git graph"                               # Git push
 alias gco="git checkout"                           # Git checkout
 
-alias wake_up="set -x; cleanupds; brew update; set +x; blog;"
+alias wake_up="set -x; cleanupds; brew update; brew upgrade; brew cleanup; set +x; blog;"
 
 # for rustup doc on apple sillicon before it becomes tier1 platform
 alias rustdoc="rustup doc --toolchain=stable-x86_64-apple-darwin"
