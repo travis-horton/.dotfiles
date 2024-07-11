@@ -28,6 +28,7 @@ vim.keymap.set({'n', 'v'}, '<leader>d', [["_d]])
 
 vim.keymap.set('n', 'Q', '<nop>')
 
+-- super substitute (substitute all instances of word under cursor)
 vim.keymap.set('n', '<leader>s', [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]])
 
 vim.keymap.set('n', '<C-h>', '<C-w>h')
