@@ -1,16 +1,16 @@
 # Sets "l" and "ll" for long list
-alias l="exa --long --git --tree --level=1 --classify --all \
+alias l="eza --long --git --tree --level=1 --classify --all \
   --group-directories-first --header --group"
-alias ll="exa --long --git --tree --level=2 --classify --all \
+alias ll="eza --long --git --tree --level=2 --classify --all \
   --group-directories-first --header --group \
   --ignore-glob='node_modules*|dist*|.parcel-cache*|.git|undodir'"
-alias lll="exa --long --git --tree --level=3 --classify --all \
+alias lll="eza --long --git --tree --level=3 --classify --all \
   --group-directories-first --header --group \
   --ignore-glob='node_modules*|dist*|.parcel-cache*|.git|undodir'"
-alias llll="exa --long --git --tree --level=4 --classify --all \
+alias llll="eza --long --git --tree --level=4 --classify --all \
   --group-directories-first --header --group \
   --ignore-glob='node_modules*|dist*|.parcel-cache*|.git|undodir'"
-alias lllll="exa --long --git --tree --level=5 --classify --all \
+alias lllll="eza --long --git --tree --level=5 --classify --all \
   --group-directories-first --header --group \
   --ignore-glob='node_modules*|dist*|.parcel-cache*|.git|undodir'"
 
@@ -56,7 +56,7 @@ alias wake_up="set -x; cleanupds; brew update; brew upgrade; brew cleanup; set +
 alias rustdoc="rustup doc --toolchain=stable-x86_64-apple-darwin"
 
 # Allows cleanupds to get rid of all the .DS_Store
-alias cleanupds="find . -type f -name '*.DS_Store' -ls -delete;"
+alias cleanupds="fd -E Library -H '^\.DS_Store$' -tf -X rm"
 
 alias rg="nocorrect rg"
 alias cat="bat"
