@@ -56,7 +56,7 @@ alias wake_up="set -x; cleanupds; brew update; brew upgrade; brew cleanup; set +
 alias rustdoc="rustup doc --toolchain=stable-x86_64-apple-darwin"
 
 # Allows cleanupds to get rid of all the .DS_Store
-alias cleanupds="fd -E Library -H '^\.DS_Store$' -tf -X rm"
+alias cleanupds="fd -E Library -H '^\.DS_Store$' -tf -X rm -v"
 
 alias rg="nocorrect rg"
 alias cat="bat"
