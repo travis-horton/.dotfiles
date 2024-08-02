@@ -1,11 +1,15 @@
 bat
-exa
+eza
 fd
+fzf
 git-delta
+jq
 lua
+mutt
 neovim
 node
 postgresql
 python@3.10
 ripgrep
 tree-sitter
+zig
