@@ -3,16 +3,16 @@ alias l="eza --long --git --tree --level=1 --classify --all \
   --group-directories-first --header --group"
 alias ll="eza --long --git --tree --level=2 --classify --all \
   --group-directories-first --header --group \
-  --ignore-glob='node_modules*|dist*|.parcel-cache*|.git|undodir'"
+  --ignore-glob='node_modules*|dist|.parcel-cache*|.git|undodir'"
 alias lll="eza --long --git --tree --level=3 --classify --all \
   --group-directories-first --header --group \
-  --ignore-glob='node_modules*|dist*|.parcel-cache*|.git|undodir'"
+  --ignore-glob='node_modules*|dist|.parcel-cache*|.git|undodir'"
 alias llll="eza --long --git --tree --level=4 --classify --all \
   --group-directories-first --header --group \
-  --ignore-glob='node_modules*|dist*|.parcel-cache*|.git|undodir'"
+  --ignore-glob='node_modules*|dist|.parcel-cache*|.git|undodir'"
 alias lllll="eza --long --git --tree --level=5 --classify --all \
   --group-directories-first --header --group \
-  --ignore-glob='node_modules*|dist*|.parcel-cache*|.git|undodir'"
+  --ignore-glob='node_modules*|dist|.parcel-cache*|.git|undodir'"
 
 export EDITOR="nvim"                  # Sets neovim as editor
 alias vi="nvim"                       # Opens neovim instead of vim
@@ -38,6 +38,9 @@ PS1="%~; "
 source ~/.config/zsh-autocomplete/zsh-autocomplete.plugin.zsh
 setopt globdots
 
+# don't expand path
+zstyle ':completion:*' keep-prefix true
+
 #Aliases
 alias zshrc="vim ~/.zshrc"                         # Easy vim zshrc
 alias vimrc="vim ~/.config/nvim/init.vim"          # Easy vim vimrc
@@ -50,7 +53,11 @@ alias gb="git branch -a"                           # Show git branches
 alias gg="git graph"                               # Git push
 alias gco="git checkout"                           # Git checkout
 
-alias wake_up="set -x; cleanupds; brew update; brew upgrade; brew cleanup; set +x; blog;"
+# nvim --headless '+Lazy! update' +qa  → the BANG makes Lazy run SYNCHRONOUSLY;
+# without it, +qa quits before the update finishes. Placed after brew so plugins
+# update against the newest neovim. Undo a bad update with:
+#   git -C ~/.config/nvim checkout lazy-lock.json   then  :Lazy restore
+alias wake_up="set -x; cleanupds; brew update; brew upgrade; brew cleanup; nvim --headless '+Lazy! update' +qa; set +x; blog;"
 
 # for rustup doc on apple sillicon before it becomes tier1 platform
 alias rustdoc="rustup doc --toolchain=stable-x86_64-apple-darwin"
@@ -61,10 +68,26 @@ alias cleanupds="fd -E Library -H '^\.DS_Store$' -tf -X rm -v"
 alias rg="nocorrect rg"
 alias cat="bat"
 
-export PATH=$PATH:~/zig
+export PATH=$PATH:~/zig:~/.bin
 
 # Fun stuff
 alias weather="curl wttr.in/83704\?m"
 alias playdf="open ~/Applications/Wineskin/df.app"
+alias pip="pip3"
+
+
+# Created by `pipx` on 2024-12-14 03:17:25
+export PATH="$PATH:/Users/travishorton/.local/bin"
+
+# Base16 Shell
+BASE16_SHELL="$HOME/.config/base16-shell/"
+if (( $(date +%H) >= 7 && $(date +%H) < 19 )); then
+  BASE16_DEFAULT_THEME="gruvbox-light-medium"
+else
+  BASE16_DEFAULT_THEME="gruvbox-dark-medium"
+fi
+[ -n "$PS1" ] && \
+    [ -s "$BASE16_SHELL/profile_helper.sh" ] && \
+        source "$BASE16_SHELL/profile_helper.sh"
 
 eval "$(zoxide init --cmd cd zsh)"

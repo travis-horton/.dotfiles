@@ -45,6 +45,7 @@ vim.opt.listchars:append({
   eol = '¬',
   trail = '·',
   tab = '| ',
+  space = '·',
 })
 
 -- Show matching brackets.
@@ -69,3 +70,4 @@ vim.o.conceallevel = 2
 
 -- Set completion options
 vim.opt.completeopt = { 'menuone', 'noselect' }
+
