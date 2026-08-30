@@ -5,7 +5,7 @@ lsp.setup()
 
 lsp.ensure_installed({
     'vimdoc',
-    'tsserver',
+    'ts_ls',
     'eslint',
     'python3',
 })
