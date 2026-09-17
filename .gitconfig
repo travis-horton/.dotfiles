@@ -41,7 +41,7 @@
   hunk-header-line-number-style = "#067a00"
   hunk-header-style = file line-number syntax
 [credential]
-	helper = store
+	helper = osxkeychain
 [credential "https://github.com"]
 	helper = 
 	helper = !/opt/homebrew/bin/gh auth git-credential

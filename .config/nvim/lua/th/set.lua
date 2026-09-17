@@ -21,8 +21,19 @@ vim.opt.textwidth = 80
 
 vim.opt.swapfile = false
 vim.opt.backup = false
-vim.opt.undodir = os.getenv('HOME') .. '/.config/nvim/undodir'
+-- Undo history lives in nvim's state dir (~/.local/state/nvim/undo), NOT under
+-- ~/.config/nvim: that path is a symlink into this (public) dotfiles repo.
+vim.opt.undodir = vim.fn.stdpath('state') .. '/undo'
 vim.opt.undofile = true
+-- Never write undo history for credential files: an undo file is a plaintext
+-- shadow of every value the buffer ever held.
+vim.api.nvim_create_autocmd({ 'BufReadPre', 'BufNewFile' }, {
+  pattern = {
+    '.env', '.env.*', '*.env', '*pws*', '*credential*', '*token*.json',
+    '.git-credentials', '*.pem', '*.key',
+  },
+  callback = function() vim.opt_local.undofile = false end,
+})
 
 vim.opt.incsearch = true
 
