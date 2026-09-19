@@ -1,0 +1,132 @@
+# HISTORY.md stays current by itself (26.0918).
+#
+# ⚠️ INSTALLED COPY of ~/.claude/skills/repo-history/history.yml — edit the
+# master and re-run the skill's install.sh; an edit here is overwritten.
+#
+# · On every open PR: `summary` checks the description carries its
+#   <!-- history --> block (repo-history skill, style.md) — a ✗ if not. Bot PRs
+#   and RELEASES pass (see below). It warns; it cannot block the merge (branch
+#   protection on a private repo needs GitHub Pro).
+# · When a PR merges into the DEFAULT branch: `append` puts its entry at the
+#   top of HISTORY.md, stamped with the PR number, link and Boise merge time,
+#   and commits it there. Pushes made with GITHUB_TOKEN do not trigger other
+#   workflows, so this commit never re-runs the tests, a deploy, or itself.
+# · RELEASE REPOS: set the repository variable HISTORY_RELEASE_FROM to the
+#   branch releases come from (www: `gh variable set HISTORY_RELEASE_FROM
+#   --body dev`). A PR from it into the default branch is a release; its entry
+#   is gathered from the feature PRs it carries, and afterwards the release
+#   branch is fast-forwarded to the default branch when it has nothing newer.
+#   Unset → every PR is ordinary.
+name: history
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened, closed]
+
+permissions:
+  contents: write
+  pull-requests: read
+
+env:
+  HISTORY_RELEASE_FROM: ${{ vars.HISTORY_RELEASE_FROM }}
+
+jobs:
+  summary:
+    if: github.event.action != 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: the PR carries its history block
+        run: node scripts/history-append.mjs --check
+
+  # RELEASE REPOS ONLY (26.0918, Travis: "Is there a way to add a rule that main can only be
+  # merged from dev?"). Fails any PR into the default branch that does not come from the release
+  # branch. Enforced by a repository ruleset on the default branch that REQUIRES this check (free
+  # on public repos). Skipped everywhere else, and a skipped required check counts as passing.
+  source:
+    if: >-
+      github.event.action != 'closed' && vars.HISTORY_RELEASE_FROM != '' &&
+      github.event.pull_request.base.ref == github.event.repository.default_branch
+    runs-on: ubuntu-latest
+    steps:
+      - name: only the release branch merges into the default branch
+        env:
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+          BASE: ${{ github.event.repository.default_branch }}
+        run: |
+          if [ "$HEAD_REF" = "$HISTORY_RELEASE_FROM" ] && [ "$HEAD_REPO" = "$GITHUB_REPOSITORY" ]; then
+            echo "✓ a release: $HISTORY_RELEASE_FROM → $BASE"
+          else
+            echo "✗ only $HISTORY_RELEASE_FROM may merge into $BASE — nothing reaches $BASE without passing through the sandbox."
+            echo "  Change this PR's base branch to $HISTORY_RELEASE_FROM (the Edit button next to its title), then release $HISTORY_RELEASE_FROM → $BASE."
+            echo "  (Dependabot security updates always open against $BASE — re-target them the same way.)"
+            exit 1
+          fi
+
+  append:
+    if: >-
+      github.event.action == 'closed' && github.event.pull_request.merged == true &&
+      github.event.pull_request.base.ref == github.event.repository.default_branch
+    runs-on: ubuntu-latest
+    concurrency:
+      group: history-append # one writer at a time; two merges a minute apart queue, never race
+      cancel-in-progress: false
+    env:
+      GITHUB_TOKEN: ${{ github.token }} # read-only use: gathering a release's feature PRs
+      DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          fetch-depth: 0 # the release-branch sync below needs real ancestry
+          # A repo whose default branch has a RULESET (www: "main: releases only from dev")
+          # stores a write deploy key as HISTORY_PUSH_KEY; the ruleset lets deploy keys
+          # through, so the bot's commits, tags and release-branch sync still land. (On a
+          # personal account GitHub will not let the Actions bot itself bypass a ruleset —
+          # tried 26.0918: "must be part of the ruleset source or owner organization".)
+          # No secret → the built-in token, as everywhere else. NOTE: a deploy-key push,
+          # unlike a token push, DOES trigger other workflows — in www that means one extra
+          # production redeploy of the same image per release, and a sandbox rebuild.
+          ssh-key: ${{ secrets.HISTORY_PUSH_KEY }}
+      - name: add the entry to HISTORY.md (and its semver version)
+        id: add
+        run: node scripts/history-append.mjs --append
+      - name: commit it to the default branch, tagged with its version
+        env:
+          VERSION: ${{ steps.add.outputs.version }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add HISTORY.md
+          for f in package.json package-lock.json; do [ -f "$f" ] && git add "$f"; done
+          if git diff --cached --quiet; then echo "nothing new to record"; exit 0; fi
+          git commit -m "HISTORY: record PR #$PR_NUMBER — v$VERSION"
+          pushed=0
+          for attempt in 1 2 3; do
+            if git push origin "HEAD:$DEFAULT_BRANCH"; then pushed=1; break; fi
+            git pull --rebase origin "$DEFAULT_BRANCH"
+          done
+          if [ "$pushed" != 1 ]; then echo "could not push the HISTORY entry after 3 tries" >&2; exit 1; fi
+          # The semver tag, on the commit that records it. An existing tag is left alone.
+          if [ -n "$VERSION" ] && ! git ls-remote --exit-code --tags origin "refs/tags/v$VERSION" >/dev/null; then
+            git tag "v$VERSION" && git push origin "v$VERSION"
+          fi
+      # RELEASE REPOS ONLY (26.0918, Travis: "why is dev 7 commits behind main?").
+      # Every release merge — and every HISTORY commit above — lands on the default
+      # branch only, so the release branch falls one-plus commits behind per
+      # release while holding the same code. After a release, move the release
+      # branch up to the default branch — FAST-FORWARD ONLY: if it already has
+      # new work of its own it is left alone (and git refuses a non-fast-forward
+      # push anyway). A GITHUB_TOKEN push triggers no workflow, so no redeploy.
+      - name: bring the release branch up to date (fast-forward only)
+        if: env.HISTORY_RELEASE_FROM != '' && github.event.pull_request.head.ref == env.HISTORY_RELEASE_FROM
+        run: |
+          git fetch -q origin "$HISTORY_RELEASE_FROM" "$DEFAULT_BRANCH"
+          if git merge-base --is-ancestor "origin/$HISTORY_RELEASE_FROM" "origin/$DEFAULT_BRANCH"; then
+            git push origin "origin/$DEFAULT_BRANCH:refs/heads/$HISTORY_RELEASE_FROM"
+            echo "fast-forwarded $HISTORY_RELEASE_FROM to $DEFAULT_BRANCH"
+          else
+            echo "$HISTORY_RELEASE_FROM already has commits $DEFAULT_BRANCH lacks — left alone; it catches up after the next release"
+          fi
