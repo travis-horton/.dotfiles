@@ -13,6 +13,13 @@ This is the whole history of Travis's settings files, newest first, written for 
 
 ## September 2026
 
+**.dotfiles #2: a plain-language history, and its automatic update** · [PR #2](https://github.com/travis-horton/.dotfiles/pull/2) · merged 26.0919.1335 · v8.8.0
+- **[The history, written from the start](https://github.com/travis-horton/.dotfiles/commit/7aca5cc)** · merged 26.0919.1335
+  New: HISTORY.md tells, newest first and in plain words, every change to these settings since 19.0322: 53 entries covering all 110 steps, each checked against what actually changed. Each entry also carries a version number, from v1.0.0 on the first day to v8.7.2 today.
+  Try it: open https://github.com/travis-horton/.dotfiles/blob/main/HISTORY.md
+- **[The automatic update](https://github.com/travis-horton/.dotfiles/commit/51d07cc)** · merged 26.0919.1335
+  Behind the scenes: every future pull request now carries its own entry, a check on GitHub warns when one is missing, and the entry is added to HISTORY.md, with its version, automatically when the pull request merges.
+
 **Undo history kept out of the public settings, and passwords in the keychain** · [commit](https://github.com/travis-horton/.dotfiles/commit/6b57dec) · merged 26.0917.1440 · v8.7.2
 - Fixed: the editor's undo history (what lets you undo changes even after closing and reopening a file) was saved inside the editor's settings folder, which is linked into this public project; a rule kept it from being uploaded, but it now lives in the editor's own private folder on the computer instead. The editor also keeps no undo history at all for password, key and token files.
   Fixed: git now signs in to sites other than GitHub through the Mac's keychain.
