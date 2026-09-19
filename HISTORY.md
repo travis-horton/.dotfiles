@@ -15,7 +15,7 @@ This is the whole history of Travis's settings files, newest first, written for 
 
 **Undo history kept out of the public settings, and passwords in the keychain** · [commit](https://github.com/travis-horton/.dotfiles/commit/6b57dec) · merged 26.0917.1440 · v8.7.2
 - Fixed: the editor's undo history (what lets you undo changes even after closing and reopening a file) was saved inside the editor's settings folder, which is linked into this public project; a rule kept it from being uploaded, but it now lives in the editor's own private folder on the computer instead. The editor also keeps no undo history at all for password, key and token files.
-  Fixed: git now keeps the passwords for sites other than GitHub in the Mac's keychain instead of in a plain text file.
+  Fixed: git now signs in to sites other than GitHub through the Mac's keychain.
 
 **The editor's language help rebuilt** · [merge](https://github.com/travis-horton/.dotfiles/commit/f04469f) · merged 26.0904.2000 · v8.7.1
 - Behind the scenes: the editor's language helpers (the part that suggests completions, explains code when you hover, and marks mistakes) now run on Neovim's own built-in system instead of an add-on (lsp-zero). Two setups had been competing, and an update had quietly stopped several settings from ever being applied, such as the list of names the Lua helper should treat as known.
@@ -40,7 +40,7 @@ This is the whole history of Travis's settings files, newest first, written for 
 - New: `wake_up` also updates the editor's add-ons, right after it updates the installed programs.
   New: the terminal and the editor share one colour theme (gruvbox), light from 07:00 to 19:00 and dark otherwise, unless another theme has been picked. The editor shows spaces as faint dots and gained a typing-practice game (Typr).
   New: in the editor, jumping half a page or to the next search match puts that line at the top of the screen instead of the middle. In the terminal, tab-completion keeps a path as you typed it, the listings hide only folders named exactly "dist", `pip` runs Python 3's pip, and two more folders of personal and Python tools are searched for commands.
-  Behind the scenes: git signs in to GitHub through the GitHub command-line tool. Passwords for other sites were kept in a plain text file until 26.0917, when they moved to the keychain.
+  Behind the scenes: git signs in to GitHub through the GitHub command-line tool.
   Try it: open Terminal and type `ll` to see the folder you are in as a tree, two levels deep.
 
 ## August 2024
@@ -82,7 +82,7 @@ This is the whole history of Travis's settings files, newest first, written for 
 ## August 2023
 
 **The editor settings, zipped** · [commit](https://github.com/travis-horton/.dotfiles/commit/7a697b0) · merged 23.0817.1629 · v7.4.1
-- Behind the scenes: a zipped copy of the new editor settings folder was saved into the project, together with private material that was in that folder. (Later removed on 24.0328.)
+- Behind the scenes: a zipped copy of the editor settings was saved. (Later removed on 24.0328.)
 
 ## December 2022
 
@@ -151,7 +151,7 @@ This is the whole history of Travis's settings files, newest first, written for 
 **The commit shortcut changes; a class-sync script** · [commits](https://github.com/travis-horton/.dotfiles/compare/b98e774...d23b776) · merged 20.0209.2056 · v6.0.0
 - Breaking: `gc` no longer includes the message option, so it opens the editor to write the commit message; `gc "message"` stopped working.
   New: `nodegitignore` adds GitHub's standard list of files to ignore in a Node project, and a script copies a class's files to and from an online workspace (removed on 22.0617).
-  Behind the scenes: the npm settings were updated, and private material was removed from them the same evening.
+  Behind the scenes: the npm settings were adjusted twice.
 
 ## December 2019
 
