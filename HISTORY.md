@@ -13,6 +13,12 @@ This is the whole history of Travis's settings files, newest first, written for 
 
 ## September 2026
 
+**.dotfiles #3: wake_up updates everything** · [PR #3](https://github.com/travis-horton/.dotfiles/pull/3) · merged 26.0929.0755 · v8.9.0
+- New: `wake_up` now also updates the two terminal add-ons installed straight from GitHub (the one that suggests completions as you type, and the colour themes), the Rust, Python-tool and JavaScript-tool installers, and the apps that normally update themselves, on top of the Homebrew programs and editor plugins it already updated. Each step is printed as it runs.
+  Try it: open a new Terminal tab and type `wake_up`
+- Fixed: the `vimrc` shortcut opened an empty file, because the editor's settings moved to a new file name; it now opens the real one. The `rustdoc` shortcut, which asked for a version of Rust that isn't installed and so never worked, is gone; `rustup doc` does the same job.
+- Behind the scenes: the editor's add-ons were updated to their newest versions, and the list of exact versions was saved so a bad update can be undone.
+
 **.dotfiles #2: a plain-language history, and its automatic update** · [PR #2](https://github.com/travis-horton/.dotfiles/pull/2) · merged 26.0919.1335 · v8.8.0
 - **[The history, written from the start](https://github.com/travis-horton/.dotfiles/commit/7aca5cc)** · merged 26.0919.1335
   New: HISTORY.md tells, newest first and in plain words, every change to these settings since 19.0322: 53 entries covering all 110 steps, each checked against what actually changed. Each entry also carries a version number, from v1.0.0 on the first day to v8.7.2 today.
