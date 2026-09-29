@@ -43,7 +43,7 @@ zstyle ':completion:*' keep-prefix true
 
 #Aliases
 alias zshrc="vim ~/.zshrc"                         # Easy vim zshrc
-alias vimrc="vim ~/.config/nvim/init.vim"          # Easy vim vimrc
+alias vimrc="vim ~/.config/nvim/init.lua"          # Easy vim vimrc
 alias zs="source ~/.zshrc"                         # Easy zshrc source
 
 alias ga="git add -Ap"                             # Git add
@@ -53,17 +53,38 @@ alias gb="git branch -a"                           # Show git branches
 alias gg="git graph"                               # Git push
 alias gco="git checkout"                           # Git checkout
 
+# Gets rid of all the .DS_Store files. A FUNCTION, not an alias: wake_up calls it,
+# and zsh expands aliases only when a function is DEFINED — an alias defined
+# below wake_up would have been "command not found" at run time.
+cleanupds () {
+  fd -E Library -H '^\.DS_Store$' -tf -X rm -v
+}
+update_git_plugins () {
+  git -C ~/.config/zsh-autocomplete pull
+  git -C ~/.config/base16-shell pull
+}
+update_language_toolchains () {
+  rustup update
+  pipx upgrade-all
+  npm update -g
+}
+
 # nvim --headless '+Lazy! update' +qa  → the BANG makes Lazy run SYNCHRONOUSLY;
 # without it, +qa quits before the update finishes. Placed after brew so plugins
 # update against the newest neovim. Undo a bad update with:
 #   git -C ~/.config/nvim checkout lazy-lock.json   then  :Lazy restore
-alias wake_up="set -x; cleanupds; brew update; brew upgrade; brew cleanup; nvim --headless '+Lazy! update' +qa; set +x; blog;"
-
-# for rustup doc on apple sillicon before it becomes tier1 platform
-alias rustdoc="rustup doc --toolchain=stable-x86_64-apple-darwin"
-
-# Allows cleanupds to get rid of all the .DS_Store
-alias cleanupds="fd -E Library -H '^\.DS_Store$' -tf -X rm -v"
+wake_up() {
+  setopt local_options xtrace   # like set -x, but switches itself off when the function ends
+  cleanupds
+  brew update
+  brew upgrade --greedy
+  brew cleanup
+  update_git_plugins
+  update_language_toolchains
+  nvim --headless '+Lazy! update' +qa
+  unsetopt xtrace
+  blog
+}
 
 alias rg="nocorrect rg"
 alias cat="bat"
