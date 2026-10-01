@@ -11,6 +11,12 @@ This is the whole history of Travis's settings files, newest first, written for 
 
 *Written from the git history on 26.0919 and checked against the actual changes of each day. From then on, each pull request carries its own entry, and it is added here automatically when the pull request merges.*
 
+## October 2026
+
+**.dotfiles #4: Ctrl-R history search works again** · [PR #4](https://github.com/travis-horton/.dotfiles/pull/4) · merged 26.1001.0806 · v8.9.1
+- Fixed: since the completion add-on was updated on 26.0929, pressing Ctrl-R in the terminal did nothing, because the add-on had replaced the search with a pop-up that never showed. Ctrl-R now opens the classic "bck-i-search" history search again.
+  Try it: open a new terminal tab, press Ctrl-R, and type part of a command you ran before.
+
 ## September 2026
 
 **.dotfiles #3: wake_up updates everything** · [PR #3](https://github.com/travis-horton/.dotfiles/pull/3) · merged 26.0929.0755 · v8.9.0
