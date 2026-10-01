@@ -36,6 +36,9 @@ PS1="%~; "
 
 # show autocomplete options
 source ~/.config/zsh-autocomplete/zsh-autocomplete.plugin.zsh
+# Ctrl-R = zsh's own history search. The updated plugin replaces it with an async
+# history menu that never appears in Terminal.app; the leading dot names the builtin.
+bindkey '^R' .history-incremental-search-backward
 setopt globdots
 
 # don't expand path
