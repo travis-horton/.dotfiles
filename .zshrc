@@ -15,6 +15,7 @@ alias lllll="eza --long --git --tree --level=5 --classify --all \
   --ignore-glob='node_modules*|dist|.parcel-cache*|.git|undodir'"
 
 export EDITOR="nvim"                  # Sets neovim as editor
+bindkey -e                            # Emacs-style line editing (Ctrl-R/A/E); must come before zsh-autocomplete, or EDITOR=nvim flips zsh to vi mode after the plugin has bound its keys
 alias vi="nvim"                       # Opens neovim instead of vim
 alias vim="nvim"                      # Opens neovim instead of vim
 
