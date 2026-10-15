@@ -13,6 +13,9 @@ This is the whole history of Travis's settings files, newest first, written for 
 
 ## October 2026
 
+**.dotfiles #5: the change log catches up on entries it missed** · [PR #5](https://github.com/travis-horton/.dotfiles/pull/5) · merged 26.1015.0727 · v8.9.2
+- Behind the scenes: the robot that writes this file after each change now also writes in any earlier finished change it missed, oldest first, with a "recorded late" note when it is more than an hour late. If GitHub won't answer one of its lookups, it skips only that one, records the newest change anyway, and fills the gap on a later run.
+
 **.dotfiles #4: Ctrl-R history search works again** · [PR #4](https://github.com/travis-horton/.dotfiles/pull/4) · merged 26.1001.0806 · v8.9.1
 - Fixed: since the completion add-on was updated on 26.0929, pressing Ctrl-R in the terminal did nothing, because the add-on had replaced the search with a pop-up that never showed. Ctrl-R now opens the classic "bck-i-search" history search again.
   Try it: open a new terminal tab, press Ctrl-R, and type part of a command you ran before.
