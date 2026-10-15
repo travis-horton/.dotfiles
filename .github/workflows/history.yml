@@ -17,11 +17,20 @@
 #   is gathered from the feature PRs it carries, and afterwards the release
 #   branch is fast-forwarded to the default branch when it has nothing newer.
 #   Unset → every PR is ordinary.
+# · CATCH-UP (adopted 26.1009, ruling M-265): every append also files ANY merged PR
+#   the history is missing, oldest first. praxis #55 (26.0919) was lost because
+#   three PRs merged within 92 s and a concurrency group keeps only ONE pending
+#   run — #56's queued run cancelled #55's (GitHub docs: "any existing pending
+#   job or workflow run in the same group is canceled and replaced";
+#   cancel-in-progress only governs RUNNING ones). The run that cancels yours
+#   is always a newer merge, and it now files yours first, so a burst heals
+#   itself. "Run workflow" on the Actions tab (workflow_dispatch) heals by hand.
 name: history
 
 on:
   pull_request:
     types: [opened, edited, synchronize, reopened, closed]
+  workflow_dispatch: # catch-up only: file every merged PR the history is missing
 
 permissions:
   contents: write
@@ -32,7 +41,7 @@ env:
 
 jobs:
   summary:
-    if: github.event.action != 'closed'
+    if: github.event_name == 'pull_request' && github.event.action != 'closed'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -45,6 +54,7 @@ jobs:
   # on public repos). Skipped everywhere else, and a skipped required check counts as passing.
   source:
     if: >-
+      github.event_name == 'pull_request' &&
       github.event.action != 'closed' && vars.HISTORY_RELEASE_FROM != '' &&
       github.event.pull_request.base.ref == github.event.repository.default_branch
     runs-on: ubuntu-latest
@@ -66,16 +76,22 @@ jobs:
 
   append:
     if: >-
+      github.event_name == 'workflow_dispatch' || (
       github.event.action == 'closed' && github.event.pull_request.merged == true &&
-      github.event.pull_request.base.ref == github.event.repository.default_branch
+      github.event.pull_request.base.ref == github.event.repository.default_branch)
     runs-on: ubuntu-latest
+    # One writer at a time, so entries and versions land in merge order. The group holds ONE
+    # running + ONE pending run: a third merge inside a burst CANCELS the pending one (that is
+    # what lost praxis #55). That is now harmless — the surviving, newer run files the cancelled
+    # PR first (catch-up, below) — and the push loop no longer depends on the group either, so
+    # the group could be deleted outright (FIX.md, option B) without losing anything. It stays
+    # ON PURPOSE (ruling M-265, 26.1009): writers in single file mean fewer push retries.
     concurrency:
-      group: history-append # one writer at a time; two merges a minute apart queue, never race
+      group: history-append
       cancel-in-progress: false
     env:
-      GITHUB_TOKEN: ${{ github.token }} # read-only use: gathering a release's feature PRs
+      GITHUB_TOKEN: ${{ github.token }} # read-only use: the merged-PR list (catch-up) and a release's feature PRs
       DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
-      PR_NUMBER: ${{ github.event.pull_request.number }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -90,29 +106,43 @@ jobs:
           # unlike a token push, DOES trigger other workflows — in www that means one extra
           # production redeploy of the same image per release, and a sandbox rebuild.
           ssh-key: ${{ secrets.HISTORY_PUSH_KEY }}
-      - name: add the entry to HISTORY.md (and its semver version)
-        id: add
-        run: node scripts/history-append.mjs --append
-      - name: commit it to the default branch, tagged with its version
-        env:
-          VERSION: ${{ steps.add.outputs.version }}
+      # One commit per PR filed, each tagged with its version; then ONE atomic push of the branch
+      # and every new tag. If the push is refused (someone else moved the branch), start over from
+      # the remote and FILE AGAIN — never `git pull --rebase`: two entries written at the top of
+      # HISTORY.md conflict on rebase, and the version each one computed would be stale anyway.
+      # Re-filing is idempotent: a PR already recorded upstream is skipped.
+      - name: file this PR, and any merged PR the history is missing, then push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add HISTORY.md
-          for f in package.json package-lock.json; do [ -f "$f" ] && git add "$f"; done
-          if git diff --cached --quiet; then echo "nothing new to record"; exit 0; fi
-          git commit -m "HISTORY: record PR #$PR_NUMBER — v$VERSION"
-          pushed=0
-          for attempt in 1 2 3; do
-            if git push origin "HEAD:$DEFAULT_BRANCH"; then pushed=1; break; fi
-            git pull --rebase origin "$DEFAULT_BRANCH"
+          for attempt in 1 2 3 4 5 6; do
+            git fetch -q --force --tags origin "$DEFAULT_BRANCH"
+            git reset -q --hard "origin/$DEFAULT_BRANCH"
+            tags=""
+            while :; do
+              line=$(node scripts/history-append.mjs --append-next | tail -n 1)
+              case "$line" in
+                NOTHING) break ;;
+                RECORDED\ *) read -r _ n v <<< "$line" ;;
+                *) echo "history-append: unexpected reply: $line" >&2; exit 1 ;;
+              esac
+              git add HISTORY.md
+              for f in package.json package-lock.json; do [ -f "$f" ] && git add "$f"; done
+              git commit -q -m "HISTORY: record PR #$n — v$v"
+              # The semver tag, on the commit that records it. An existing tag is left alone.
+              if ! git rev-parse -q --verify "refs/tags/v$v" >/dev/null; then git tag "v$v"; tags="$tags v$v"; fi
+            done
+            if [ "$(git rev-parse HEAD)" = "$(git rev-parse "origin/$DEFAULT_BRANCH")" ]; then
+              echo "nothing new to record"; exit 0
+            fi
+            refs="HEAD:refs/heads/$DEFAULT_BRANCH"
+            for t in $tags; do refs="$refs refs/tags/$t"; done
+            if git push -q --atomic origin $refs; then echo "recorded and tagged:$tags"; exit 0; fi
+            for t in $tags; do git tag -d "$t" >/dev/null; done
+            sleep $(( attempt * 5 + RANDOM % 10 ))
           done
-          if [ "$pushed" != 1 ]; then echo "could not push the HISTORY entry after 3 tries" >&2; exit 1; fi
-          # The semver tag, on the commit that records it. An existing tag is left alone.
-          if [ -n "$VERSION" ] && ! git ls-remote --exit-code --tags origin "refs/tags/v$VERSION" >/dev/null; then
-            git tag "v$VERSION" && git push origin "v$VERSION"
-          fi
+          echo "could not push the HISTORY entries after 6 tries" >&2
+          exit 1
       # RELEASE REPOS ONLY (26.0918, Travis: "why is dev 7 commits behind main?").
       # Every release merge — and every HISTORY commit above — lands on the default
       # branch only, so the release branch falls one-plus commits behind per
