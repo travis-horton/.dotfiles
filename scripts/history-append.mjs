@@ -32,6 +32,10 @@
 //                Idempotent: a PR already in the file is left alone. A PR with
 //                no block still gets a line, marked as missing its summary, so
 //                the gap is visible in the history instead of silent.
+//   --append-next  what the workflow calls (26.1009, ruling M-265): files the
+//                OLDEST merged PR the history is missing — this run's own, or
+//                one an earlier run lost — and prints RECORDED <n> <v> or
+//                NOTHING; the workflow loops until NOTHING. See CATCH-UP below.
 //   --self-test  the asserts, no network, no event file (smoke:history).
 //
 // RELEASE REPOS (www): when HISTORY_RELEASE_FROM names a branch (the repo
@@ -44,7 +48,9 @@
 //
 // The PR body is DATA: it is read from the event file, never interpolated into
 // a shell command.
-import { readFileSync, writeFileSync, realpathSync, existsSync, appendFileSync } from "node:fs";
+import { readFileSync, writeFileSync, realpathSync, existsSync, appendFileSync, mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 // The "<label> #N:" prefix. Default: the repo's own name (GITHUB_REPOSITORY is
@@ -317,12 +323,146 @@ export function insertEntry(doc, entry, mergedAt) {
   const at = doc.search(/^## /m);
   if (at === -1) return `${doc.trimEnd()}\n\n${heading}\n\n${entry}\n`;
   const first = doc.slice(at).split("\n")[0];
-  if (first === heading) {
+  const month = (h) => { const m = /^## (\S+) (\d{4})\s*$/.exec(h); return m && MONTHS.includes(m[1]) ? Number(m[2]) * 12 + MONTHS.indexOf(m[1]) : null; };
+  // Never open a heading older than the top one: like a late entry, it sits where it was recorded.
+  const older = month(heading) !== null && month(first) !== null && month(heading) < month(first);
+  if (first === heading || older) {
     const after = at + first.length;
     return `${doc.slice(0, after)}\n\n${entry}\n${doc.slice(after).replace(/^\n+/, "\n")}`;
   }
   return `${doc.slice(0, at)}${heading}\n\n${entry}\n\n${doc.slice(at)}`;
 }
+
+// ── CATCH-UP (adopted 26.1009, ruling M-265) ───────────────────────────────
+// praxis #55 (26.0919) never got its entry: three PRs merged within 92 s, and
+// the workflow's concurrency group keeps only ONE pending run, so #56's run
+// cancelled #55's before it started. From now on every merge also files ANY
+// merged PR the history is missing, so one lost run heals itself on the next
+// merge. "Missing" is bounded below by the FLOOR: the merge stamp of the
+// oldest entry this workflow wrote itself (header `**<label> #N: …`), so a
+// backfilled repo's older PRs are never re-filed.
+
+/** Is PR #n already recorded? (any `[PR #n](…/pull/n)` link counts — backfill entries too) */
+export const recorded = (doc, n) => new RegExp(`\\[PR #${n}\\]\\([^)\\s]*/pull/${n}\\)`).test(doc);
+
+/** The catch-up floor: the oldest merge stamp on a bot-written header, or null (nothing written yet). */
+export function catchUpFloor(doc, label = REPO_LABEL || "repo") {
+  const esc = label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const re = new RegExp(`^\\*\\*${esc} #\\d+: .*? · merged (\\d\\d\\.\\d{4}\\.\\d{4})`, "gm");
+  let floor = null;
+  for (const m of doc.matchAll(re)) if (!floor || m[1] < floor) floor = m[1];
+  return floor;
+}
+
+/** The merged PRs still to file, OLDEST first: `prs` (from the API, plus the event's own PR) that
+ *  merged into `base` at or after the floor and are not yet recorded. No floor → only `mustInclude`. */
+export function toFile(doc, prs, { base, floor, mustInclude = null }) {
+  const seen = new Set();
+  return prs
+    .filter((p) => p && p.merged_at && p.base?.ref === base)
+    .filter((p) => (seen.has(p.number) ? false : seen.add(p.number)))
+    .filter((p) => p.number === mustInclude || (floor && boiseStamp(p.merged_at).stamp >= floor))
+    .filter((p) => !recorded(doc, p.number))
+    .sort((a, b) => a.merged_at.localeCompare(b.merged_at) || a.number - b.number);
+}
+
+/** Filed more than an hour after it merged → a LATE entry: it goes at the top in arrival order with the
+ *  next version (never renumbering anything already published or tagged), says when it was recorded,
+ *  and sits under the CURRENT month heading (insertEntry with the merge time would open a stale
+ *  "## September" heading above October). */
+export const LATE_MS = 60 * 60 * 1000;
+export function lateStamp(mergedAt, nowIso) {
+  return Date.parse(nowIso) - Date.parse(mergedAt) > LATE_MS ? boiseStamp(nowIso).stamp : null;
+}
+
+/** ` · recorded late YY.MMDD.HHMM` after the merge stamp (tags.py's header pattern allows one such field). */
+export function markLate(entry, stamp) {
+  const [head, ...rest] = entry.split("\n");
+  return [head.replace(/( · merged \d\d\.\d{4}\.\d{4})/, `$1 · recorded late ${stamp}`), ...rest].join("\n");
+}
+
+/** File ONE PR into the document: returns { doc, version }. `from` (the release branch) and
+ *  `features` (a release's feature-PR lookup) are seams for the self-test and for fileNext. */
+export async function fileOne(doc, pr, nowIso, { from = RELEASE_FROM, features = releaseFeatures } = {}) {
+  const base = { number: pr.number, title: pr.title, url: pr.html_url, mergedAt: pr.merged_at, body: pr.body };
+  let entry = isRelease(pr, from) ? buildReleaseEntry({ ...base, features: await features(pr) }) : buildEntry({ ...base, bot: isBot(pr) });
+  const late = lateStamp(pr.merged_at, nowIso);
+  if (late) entry = markLate(entry, late);
+  const version = versionForNew(doc, entry);
+  return { doc: insertEntry(doc, stampHeader(entry, version), late ? nowIso : pr.merged_at), version };
+}
+
+/** File the OLDEST PR in `queue` that can be filed now: returns { doc, version, pr }, or null when
+ *  the queue is empty or every PR in it was skipped. (26.1010, Auditor2 F2.) A CATCH-UP release PR
+ *  (not the run's `own`) whose feature lookup fails is skipped with `onSkip` and filed by a later
+ *  run; only that lookup is caught. The run's own PR, and every non-release PR, are filed with no
+ *  catch, so a failure there still fails the run. */
+export async function fileNext(doc, queue, {
+  own = null, nowIso, from = RELEASE_FROM, features = releaseFeatures,
+  onSkip = (pr, e) => warn(`catch-up — release PR #${pr.number}'s feature lookup failed (${e.message}); skipped this run, a later run files it`),
+} = {}) {
+  for (const pr of queue) {
+    if (pr.number !== own && isRelease(pr, from)) {
+      let feats;
+      try { feats = await features(pr); }
+      catch (e) { onSkip(pr, e); continue; }
+      return { ...(await fileOne(doc, pr, nowIso, { from, features: async () => feats })), pr };
+    }
+    return { ...(await fileOne(doc, pr, nowIso, { from, features })), pr };
+  }
+  return null;
+}
+
+/** Read the next page? Only when this one is FULL (100) and its oldest `updated_at` is still at or
+ *  after the floor. The list comes newest-updated first, and a PR merged after the floor was
+ *  updated at or after that moment, so a page that reaches back past the floor holds the last of
+ *  them. (A fixed page count would stop at the 300 newest: praxis passed 218 closed PRs on 26.1009.) */
+export function morePages(page, floor) {
+  if (!Array.isArray(page) || page.length < 100 || !floor) return false;
+  const oldest = page.reduce((m, p) => (p.updated_at < m ? p.updated_at : m), page[0].updated_at);
+  return boiseStamp(oldest).stamp >= floor;
+}
+
+export const MAX_PAGES = 50;
+const warn = (msg) => console.error(`::warning::history: ${msg}`);
+
+/** Every PR merged into `base`, paged back to the floor through `fetchPage(base, page)` (1-based).
+ *  No floor (a fresh install) → no call at all: only the run's own PR is filed then. ANY failure
+ *  (rate limit, 5xx, permission) → `onError(err)` and an EMPTY list, never a throw: catch-up is
+ *  skipped for this run, and the run's own PR is still filed. */
+export async function gatherMerged(fetchPage, base, floor, onError = (e) => warn(`catch-up skipped — ${e.message}`)) {
+  if (!floor) return [];
+  const out = [];
+  try {
+    for (let page = 1; page <= MAX_PAGES; page++) {
+      const c = await fetchPage(base, page);
+      out.push(...c.filter((p) => p.merged_at));
+      if (!morePages(c, floor)) return out;
+    }
+    warn(`catch-up stopped at ${MAX_PAGES} pages (${MAX_PAGES * 100} closed PRs) before reaching the floor ${floor}`);
+    return out;
+  } catch (e) {
+    onError(e);
+    return [];
+  }
+}
+
+/** The merged-PR list --append-next works from, cached per job at `cache` so a push retry (reset to
+ *  the remote, file again) costs no extra API calls. A cached list is used as is. No floor → [] and
+ *  nothing cached. A FAILED fetch is never cached, so the next call in this job (or a retry) can
+ *  try again: `onError` fires and the list is []. */
+export async function mergedList(cache, fetchPage, base, floor, onError = (e) => warn(`catch-up skipped — ${e.message}`)) {
+  if (existsSync(cache)) return JSON.parse(readFileSync(cache, "utf8"));
+  if (!floor) return [];
+  let failed = false;
+  const list = await gatherMerged(fetchPage, base, floor, (e) => { failed = true; onError(e); });
+  if (!failed) writeFileSync(cache, JSON.stringify(list));
+  return list;
+}
+
+/** The read-only GitHub fetcher gatherMerged uses inside Actions: closed PRs into `base`, newest-updated first. */
+const ghPulls = (base, page) =>
+  gh(`/repos/${process.env.GITHUB_REPOSITORY}/pulls?state=closed&base=${encodeURIComponent(base)}&sort=updated&direction=desc&per_page=100&page=${page}`);
 
 function event() {
   const p = process.env.GITHUB_EVENT_PATH;
@@ -330,7 +470,7 @@ function event() {
   return JSON.parse(readFileSync(p, "utf8")).pull_request;
 }
 
-function selfTest() {
+async function selfTest() {
   let pass = 0; const fails = [];
   const ok = (c, l) => (c ? pass++ : fails.push(l));
   // 20:31Z on 26.0918 is 14:31 in Boise (MDT, UTC−6); 03:00Z on 26.1001 is still 26.0930 in Boise.
@@ -388,6 +528,129 @@ function selfTest() {
   ok(d1 === "# T\n\nintro\n\n## September 2026\n\n**new** · y\n- New: w.\n\n**old** · x\n- Fixed: z.\n", "insert: same month → directly under the heading, one blank line either side");
   const d2 = insertEntry(doc, "**oct** · y\n- New: w.", "2026-10-02T18:00:00Z");
   ok(d2 === "# T\n\nintro\n\n## October 2026\n\n**oct** · y\n- New: w.\n\n## September 2026\n\n**old** · x\n- Fixed: z.\n", "insert: a new month → a new heading above the last one");
+  // Month boundary (26.1010): a late entry already opened November at the top; an on-time PR merged at
+  // 23:30 on Oct 31 (Boise, 05:30Z Nov 1) asks for October. It must sit at the top under November.
+  const nov = "# H\n\n## November 2026\n\n**praxis #55: b** · [PR #55](u55) · merged 26.0919.1740 · recorded late 26.1101.0010 · v1.3.1\n- Fixed: b.\n\n## October 2026\n\n**praxis #56: c** · [PR #56](u56) · merged 26.0919.1741 · v1.3.0\n- Fixed: c.\n";
+  const e57 = "**praxis #57: d** · [PR #57](u57) · merged 26.1031.2330 · v1.3.2\n- Fixed: d.";
+  const d3 = insertEntry(nov, e57, "2026-11-01T05:30:00Z");
+  ok(d3 === nov.replace("## November 2026\n\n", `## November 2026\n\n${e57}\n\n`) && (d3.match(/^## October 2026$/gm) || []).length === 1 && d3.indexOf("## November 2026") < d3.indexOf("## October 2026"), "insert: an entry from a month OLDER than the top heading sits first under the top heading — never a second, older heading above it");
+  // catch-up (adopted 26.1009, ruling M-265) — the praxis #54/#55/#56 case, offline
+  const P = (n, mergedAt, base = "main") => ({ number: n, title: `pr ${n}`, html_url: `https://github.com/o/praxis/pull/${n}`, merged_at: mergedAt, base: { ref: base }, head: { ref: `b${n}` }, user: { login: "t" }, body: `<!-- history -->\n**thing ${n}**\n- Fixed: ${n}.\n<!-- /history -->` });
+  const cdoc = "# H\n\n## October 2026\n\n**praxis #56: c** · [PR #56](https://github.com/o/praxis/pull/56) · merged 26.0919.1741 · v1.3.0\n- Fixed: c.\n\n**praxis #54: a** · [PR #54](https://github.com/o/praxis/pull/54) · merged 26.0919.1740 · v1.2.0\n- New: a.\n\n## September 2026\n\n**backfilled** · [PR #9](https://github.com/o/praxis/pull/9) · merged 26.0901.1000 · v1.1.0\n- New: old.\n";
+  ok(recorded(cdoc, 54) && recorded(cdoc, 9) && !recorded(cdoc, 55) && !recorded(cdoc, 5), "catch-up: a PR is recorded by its [PR #n](…/pull/n) link, backfill entries included");
+  ok(catchUpFloor(cdoc, "praxis") === "26.0919.1740" && catchUpFloor("# H\n\n**backfilled** · [PR #9](u) · merged 26.0901.1000\n", "praxis") === null, "catch-up: the floor is the oldest bot-written header; none → null");
+  const lost = [P(56, "2026-09-19T23:41:35Z"), P(55, "2026-09-19T23:40:32Z"), P(54, "2026-09-19T23:40:00Z"), P(8, "2026-09-01T10:00:00Z"), P(70, "2026-10-09T05:00:00Z", "dev")];
+  ok(toFile(cdoc, [...lost, P(57, "2026-10-09T05:00:00Z")], { base: "main", floor: "26.0919.1740", mustInclude: 57 }).map((p) => p.number).join(",") === "55,57", "catch-up: files the lost #55 then the event's #57 — oldest first, never below the floor, never another base");
+  ok(toFile(cdoc, [P(57, "2026-10-09T05:00:00Z"), P(55, "2026-09-19T23:40:32Z")], { base: "main", floor: null, mustInclude: 57 }).map((p) => p.number).join(",") === "57", "catch-up: no floor yet (fresh install) → only the event's own PR");
+  ok(toFile(cdoc, [P(56, "2026-09-19T23:41:35Z")], { base: "main", floor: "26.0919.1740", mustInclude: 56 }).length === 0, "catch-up: the event's PR already recorded (a race lost) → nothing to do");
+  ok(lateStamp("2026-09-19T23:40:32Z", "2026-10-09T14:12:00Z") === "26.1009.0812" && lateStamp("2026-09-19T23:40:32Z", "2026-09-19T23:50:00Z") === null, "late: over an hour after merging → late, stamped with the Boise filing time; a queued run minutes behind is on time");
+  const lateEntry = markLate("**praxis #55: b** · [PR #55](u) · merged 26.0919.1740\n- Fixed: b.", "26.1009.0812");
+  ok(lateEntry.startsWith("**praxis #55: b** · [PR #55](u) · merged 26.0919.1740 · recorded late 26.1009.0812\n") && versionIn(stampHeader(lateEntry, "1.3.1")) === "1.3.1", "late: the header says when it was recorded, and still carries its version at the end");
+  const TAGS_HEAD = /^\*\*(.+?)\*\* · (.*) · (?:merged|backed up) (\d\d\.\d{4}\.\d{4})(?: ·[^·]*)? · v(\d+\.\d+\.\d+)\s*$/;
+  ok(TAGS_HEAD.test(stampHeader(lateEntry, "1.3.1").split("\n")[0]), "late: the header still matches tags.py's pattern");
+  // fileOne is async; checked synchronously through a promise below
+  const pending = fileOne(cdoc, P(55, "2026-09-19T23:40:32Z"), "2026-10-09T14:12:00Z").then(({ doc: d, version }) => {
+    ok(version === "1.3.1" && d.indexOf("[PR #55]") < d.indexOf("[PR #56]") && d.indexOf("[PR #55]") > d.indexOf("## October 2026") && (d.match(/## September 2026/g) || []).length === 1, "late: #55 lands at the TOP under the current month with the NEXT version; nothing published is renumbered");
+  });
+  await pending;
+  {
+    // One catch-up run across the month boundary (26.1010): late #55 filed at 00:10 Nov 1 (Boise) opens
+    // November; then on-time #57, merged 23:30 Oct 31 (Boise), is filed in the same run.
+    const now = "2026-11-01T06:10:00Z";
+    const a = await fileOne(cdoc, P(55, "2026-09-19T23:40:32Z"), now);
+    const b = await fileOne(a.doc, P(57, "2026-11-01T05:30:00Z"), now);
+    const months = [...b.doc.matchAll(/^## (\w+) (\d{4})$/gm)].map((m) => `${m[1]} ${m[2]}`);
+    ok(a.version === "1.3.1" && b.version === "1.3.2" && b.doc.indexOf("[PR #57]") < b.doc.indexOf("[PR #55]") && b.doc.indexOf("[PR #55]") < b.doc.indexOf("[PR #56]") && /· recorded late 26\.1101\.0010 · v1\.3\.1/.test(b.doc) && !/\[PR #57\][^\n]*recorded late/.test(b.doc), "boundary run: late #55 then on-time #57 → versions in filing order, newest on top, only #55 marked late");
+    ok(months.join(" | ") === "November 2026 | October 2026 | September 2026", `boundary run: every month heading once, newest first (got: ${months.join(" | ")})`);
+  }
+  // catch-up paging + degrade (26.1010, ruling M-265): page the merged-PR list back to the floor,
+  // and a failing API call skips catch-up instead of failing the run's own PR.
+  const U = (n, updatedAt, merged = true) => ({ ...P(n, merged ? "2026-10-01T18:00:00Z" : null), updated_at: updatedAt });
+  const fullPage = (oldest) => [...Array.from({ length: 99 }, (_, i) => U(1000 + i, "2026-10-09T18:00:00Z")), U(999, oldest)];
+  ok(morePages(fullPage("2026-09-20T18:00:00Z"), "26.0919.1740") === true, "paging: a full page whose oldest update is still after the floor → fetch the next page");
+  ok(morePages(fullPage("2026-09-01T18:00:00Z"), "26.0919.1740") === false, "paging: a full page that reaches back past the floor → stop");
+  ok(morePages([U(1, "2026-09-20T18:00:00Z")], "26.0919.1740") === false, "paging: a short page is the last page → stop");
+  {
+    let warned = 0;
+    const thrown = await gatherMerged(async () => { throw new Error("HTTP 403"); }, "main", "26.0919.1740", () => warned++).catch(() => "threw");
+    ok(Array.isArray(thrown) && thrown.length === 0 && warned === 1, "degrade: a failing API call → an empty list and one warning, never a throw (the run's own PR still gets filed)");
+    let calls = 0;
+    const pages = [
+      Array.from({ length: 100 }, (_, i) => U(500 + i, "2026-10-05T18:00:00Z", i % 2 === 0)),
+      [...Array.from({ length: 99 }, (_, i) => U(400 + i, "2026-09-25T18:00:00Z")), U(399, "2026-09-10T18:00:00Z")],
+      Array.from({ length: 100 }, (_, i) => U(300 + i, "2026-09-01T18:00:00Z")),
+    ];
+    const got = await gatherMerged(async (base, page) => { calls++; return pages[page - 1]; }, "main", "26.0919.1740", () => {});
+    ok(calls === 2 && got.length === 150 && got.every((p) => p.merged_at), "paging: stops after the first page that crosses the floor (2 calls), and keeps only merged PRs");
+    let nullCalls = 0;
+    const fresh = await gatherMerged(async () => { nullCalls++; return []; }, "main", null, () => {});
+    ok(nullCalls === 0 && Array.isArray(fresh) && fresh.length === 0, "paging: no floor (a fresh install) → no API call at all");
+    // Four full pages all updated after the floor, then the page that crosses it, then one more that
+    // must never be read. Pins the loop itself (not just morePages): any fixed cap below 5 stops early.
+    let deepCalls = 0;
+    const deep = [
+      ...[0, 1, 2, 3].map((k) => Array.from({ length: 100 }, (_, i) => U(2000 + k * 100 + i, "2026-10-0" + (8 - k) + "T18:00:00Z", i % 4 !== 0))),
+      [...Array.from({ length: 99 }, (_, i) => U(2400 + i, "2026-09-25T18:00:00Z")), U(2499, "2026-09-10T18:00:00Z")],
+      Array.from({ length: 100 }, (_, i) => U(2500 + i, "2026-09-01T18:00:00Z")),
+    ];
+    const deepGot = await gatherMerged(async (base, page) => { deepCalls++; return deep[page - 1]; }, "main", "26.0919.1740", () => {});
+    ok(deepCalls === 5 && deepGot.length === 4 * 75 + 100 && new Set(deepGot.map((p) => p.number)).size === 400, "paging: 4 full pages after the floor, then the one that crosses it → exactly 5 calls, every merged PR from all 5 kept");
+  }
+  {
+    // The per-job cache (mergedList): a failed fetch is never cached, a good one is, a cached one costs no call.
+    const dir = mkdtempSync(join(tmpdir(), "history-append-selftest-"));
+    try {
+      const cache = join(dir, "history-merged-prs.json");
+      let errs = 0, calls = 0;
+      const bad = await mergedList(cache, async () => { calls++; throw new Error("HTTP 401"); }, "main", "26.0919.1740", () => errs++).catch(() => "threw");
+      ok(Array.isArray(bad) && bad.length === 0 && errs === 1 && !existsSync(cache), "cache: a failed fetch → empty list, one warning, and NO cache file (a retry can fetch again)");
+      const good = await mergedList(cache, async () => { calls++; return [U(1, "2026-10-01T18:00:00Z"), U(2, "2026-10-01T18:00:00Z", false)]; }, "main", "26.0919.1740", () => errs++);
+      ok(good.length === 1 && existsSync(cache) && JSON.parse(readFileSync(cache, "utf8")).length === 1, "cache: a good fetch is written to the cache file");
+      const before = calls;
+      const again = await mergedList(cache, async () => { calls++; return []; }, "main", "26.0919.1740", () => errs++);
+      ok(calls === before && again.length === 1 && again[0].number === 1, "cache: a cached list is reused with no API call");
+      rmSync(cache);
+      const noFloor = await mergedList(cache, async () => { calls++; return []; }, "main", null, () => errs++);
+      ok(calls === before && noFloor.length === 0 && !existsSync(cache), "cache: no floor → no call and no cache file");
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  }
+  {
+    // 26.1010 (Auditor2 F2): in a release repo (www), a MISSED release PR whose feature lookup fails
+    // is skipped this run with one warning, and the run's own PR is still filed; a later run files the
+    // skipped one late. A failed lookup for the run's OWN release PR still fails the run (a re-run heals).
+    const nowIso = "2026-10-10T19:00:00Z";
+    const wdoc = "# www\n\n## October 2026\n\n**www #150: a** · [PR #150](https://github.com/travis-horton/www/pull/150) · merged 26.1001.1000 · v3.30.0\n- New: a.\n";
+    const W = (n, minsAgo, head, login = "t") => ({ number: n, title: `pr ${n}`, html_url: `https://github.com/travis-horton/www/pull/${n}`, merged_at: new Date(Date.parse(nowIso) - minsAgo * 60000).toISOString(), base: { ref: "main" }, head: { ref: head }, user: { login }, body: "" });
+    const rel151 = W(151, 180, "dev");
+    const own152 = W(152, 3, "dependabot/x", "dependabot[bot]");
+    const feat140 = { number: 140, title: "feat 140", html_url: "https://github.com/travis-horton/www/pull/140", merged_at: "2026-10-09T18:00:00Z", base: { ref: "dev" }, user: { login: "t" }, body: "<!-- history -->\n**a new page**\n- New: a page.\n<!-- /history -->" };
+    const boom = async (p) => { throw new Error(`GitHub API /repos/travis-horton/www/pulls/${p.number}/commits: HTTP 503`); };
+    // (a) catch-up release PR's lookup throws → skipped with one warning; own #152 filed
+    const skipsA = []; let lookupsA = 0;
+    const a = await fileNext(wdoc, [rel151, own152], { own: 152, nowIso, from: "dev", features: (p) => { lookupsA++; return boom(p); }, onSkip: (p) => skipsA.push(p.number) }).catch((e) => `threw: ${e.message}`);
+    ok(a?.pr?.number === 152 && a.version === "3.30.1" && recorded(a.doc, 152) && !recorded(a.doc, 151) && skipsA.join(",") === "151" && lookupsA === 1, `release lookup: a missed release PR whose lookup fails is skipped with one warning, and the run's own PR is still filed (got: ${typeof a === "string" ? a : a?.pr?.number})`);
+    // (b) the run's OWN PR is a release and its lookup throws → reject (the run fails visibly, as before)
+    const skipsB = [];
+    const b = await fileNext(wdoc, [W(153, 3, "dev")], { own: 153, nowIso, from: "dev", features: boom, onSkip: (p) => skipsB.push(p.number) }).then(() => "resolved", (e) => `threw: ${e.message}`);
+    ok(b.startsWith("threw: GitHub API") && skipsB.length === 0, `release lookup: a failure on the run's OWN release PR still fails the run — no catch around it (got: ${b})`);
+    // (c) manual run (no own PR), only the failing catch-up PR queued → null (the CLI prints NOTHING)
+    const skipsC = [];
+    const c = await fileNext(wdoc, [rel151], { own: null, nowIso, from: "dev", features: boom, onSkip: (p) => skipsC.push(p.number) }).catch((e) => `threw: ${e.message}`);
+    ok(c === null && skipsC.join(",") === "151", `release lookup: a manual run whose only missing PR is a failing release → null (NOTHING), one warning (got: ${c})`);
+    // (d) heal: next run the lookup works → #151 filed late, with a version ABOVE #152's, on top
+    if (a && typeof a === "object") {
+      const healIso = "2026-10-10T20:00:00Z";
+      const d = await fileNext(a.doc, [rel151], { own: null, nowIso: healIso, from: "dev", features: async () => [feat140], onSkip: () => {} });
+      const versions = splitEntries(d?.doc ?? "").map(versionIn);
+      ok(d?.pr?.number === 151 && d.version === "3.31.0" && versions.join(" ") === "3.31.0 3.30.1 3.30.0" && /\[PR #151\][^\n]*recorded late 26\.1010\.1400/.test(d.doc) && d.doc.includes("[a new page](https://github.com/travis-horton/www/pull/140)") && (d.doc.match(/^## October 2026$/gm) || []).length === 1, `release lookup: the skipped PR heals on a later run — filed late on top with the next version, versions still decrease top-down (got: ${versions.join(" ")})`);
+    } else ok(false, "release lookup: heal row needs row (a)'s document");
+    // (e) a catch-up release PR whose lookup SUCCEEDS is still filed first, fetched exactly once
+    let lookupsE = 0;
+    const e = await fileNext(wdoc, [rel151, own152], { own: 152, nowIso, from: "dev", features: async () => { lookupsE++; return [feat140]; }, onSkip: () => {} }).catch((err) => `threw: ${err.message}`);
+    ok(e?.pr?.number === 151 && e.version === "3.31.0" && recorded(e.doc, 151) && !recorded(e.doc, 152) && lookupsE === 1 && /\[PR #151\][^\n]*recorded late/.test(e.doc), `release lookup: a missed release PR whose lookup works is filed first (oldest first), its features fetched once (got: ${typeof e === "string" ? e : `#${e?.pr?.number}, ${lookupsE} lookups`})`);
+  }
   console.log(fails.length ? fails.map((f) => `FAIL  ${f}`).join("\n") : "");
   console.log(`HISTORY-APPEND SMOKE ${fails.length ? "FAILED" : "PASSED"}  (${pass} passed · ${fails.length} failed · 0 skipped)`);
   process.exit(fails.length ? 1 : 0);
@@ -429,6 +692,34 @@ else if (mode === "--check") {
     "<!-- history -->\n**plain name of the change**\n- New: what you can now see or do.\n  Try it: the exact address or command.\n<!-- /history -->\n",
   );
   process.exit(1);
+} else if (mode === "--append-next") {
+  // node scripts/history-append.mjs --append-next   (adopted 26.1009, ruling M-265)
+  // Files the OLDEST merged PR the history is missing — the event's own PR, or one an earlier run
+  // lost — and prints one machine line for the workflow's loop:
+  //   RECORDED <pr> <version>   (call again: there may be more)
+  //   NOTHING                   (the history is complete)
+  // The merged-PR list is fetched once per job and cached in $RUNNER_TEMP, so a push retry
+  // (reset to the remote, file again) costs no extra API calls. HISTORY_CATCHUP=off → own PR only.
+  // 26.1010 (Auditor2 F2): a missed RELEASE PR whose feature lookup fails is skipped with a warning
+  // and a later run files it; the run's own PR is still filed (a failure on the own PR fails the run).
+  const pr = event() ?? null; // null on a manual "Run workflow" (workflow_dispatch): catch-up only
+  const branch = process.env.DEFAULT_BRANCH || pr?.base?.ref || "main";
+  const doc = existsSync(DOC)
+    ? readFileSync(DOC, "utf8")
+    : `# ${REPO_LABEL || "repo"} — what changed, in plain words\n\nNewest first. Entries before the first one here are still to be written (the backfill).\n`;
+  let list = [];
+  const floor = catchUpFloor(doc);
+  if (process.env.HISTORY_CATCHUP !== "off") {
+    list = await mergedList(`${process.env.RUNNER_TEMP || "/tmp"}/history-merged-prs.json`, ghPulls, branch, floor);
+  }
+  const queue = toFile(doc, pr ? [...list, pr] : list, { base: branch, floor, mustInclude: pr?.number ?? null });
+  const done = await fileNext(doc, queue, { own: pr?.number ?? null, nowIso: new Date().toISOString() });
+  if (!done) { console.log("NOTHING"); process.exit(0); }
+  const { doc: out, version, pr: next } = done;
+  writeFileSync(DOC, out);
+  setPackageVersion(version);
+  if (next.number !== pr?.number) console.error(`history: CATCH-UP — PR #${next.number} (merged ${boiseStamp(next.merged_at).stamp}) was not recorded yet; filed it (this run's own PR: ${pr ? `#${pr.number}` : "none — a manual run"}).`);
+  console.log(`RECORDED ${next.number} ${version}`);
 } else if (mode === "--append") {
   const pr = event();
   if (!pr.merged_at) { console.log(`history: PR #${pr.number} was closed without merging — nothing to record.`); process.exit(0); }
@@ -447,6 +738,6 @@ else if (mode === "--check") {
   console.log(`history: version v${version}.`);
   console.log(`history: PR #${pr.number} added to HISTORY.md.`);
 } else {
-  console.error("usage: history-append.mjs --check | --append | --self-test");
+  console.error("usage: history-append.mjs --check | --append-next | --append | --self-test");
   process.exit(2);
 }
