@@ -44,7 +44,7 @@ jobs:
     if: github.event_name == 'pull_request' && github.event.action != 'closed'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: the PR carries its history block
         run: node scripts/history-append.mjs --check
 
@@ -93,7 +93,7 @@ jobs:
       GITHUB_TOKEN: ${{ github.token }} # read-only use: the merged-PR list (catch-up) and a release's feature PRs
       DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ github.event.repository.default_branch }}
           fetch-depth: 0 # the release-branch sync below needs real ancestry
@@ -118,7 +118,7 @@ jobs:
           for attempt in 1 2 3 4 5 6; do
             git fetch -q --force --tags origin "$DEFAULT_BRANCH"
             git reset -q --hard "origin/$DEFAULT_BRANCH"
-            tags=""
+            tags=()
             while :; do
               line=$(node scripts/history-append.mjs --append-next | tail -n 1)
               case "$line" in
@@ -130,15 +130,17 @@ jobs:
               for f in package.json package-lock.json; do [ -f "$f" ] && git add "$f"; done
               git commit -q -m "HISTORY: record PR #$n — v$v"
               # The semver tag, on the commit that records it. An existing tag is left alone.
-              if ! git rev-parse -q --verify "refs/tags/v$v" >/dev/null; then git tag "v$v"; tags="$tags v$v"; fi
+              if ! git rev-parse -q --verify "refs/tags/v$v" >/dev/null; then git tag "v$v"; tags+=("v$v"); fi
             done
             if [ "$(git rev-parse HEAD)" = "$(git rev-parse "origin/$DEFAULT_BRANCH")" ]; then
               echo "nothing new to record"; exit 0
             fi
-            refs="HEAD:refs/heads/$DEFAULT_BRANCH"
-            for t in $tags; do refs="$refs refs/tags/$t"; done
-            if git push -q --atomic origin $refs; then echo "recorded and tagged:$tags"; exit 0; fi
-            for t in $tags; do git tag -d "$t" >/dev/null; done
+            # The branch, then each new tag, one argument apiece: bash arrays, so nothing
+            # relies on word splitting (and shellcheck has nothing to flag — M-141, 26.1015).
+            refs=("HEAD:refs/heads/$DEFAULT_BRANCH")
+            for t in "${tags[@]}"; do refs+=("refs/tags/$t"); done
+            if git push -q --atomic origin "${refs[@]}"; then echo "recorded and tagged: ${tags[*]}"; exit 0; fi
+            for t in "${tags[@]}"; do git tag -d "$t" >/dev/null; done
             sleep $(( attempt * 5 + RANDOM % 10 ))
           done
           echo "could not push the HISTORY entries after 6 tries" >&2
